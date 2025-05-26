@@ -15,60 +15,86 @@ resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: logAnalyticsName
 }
 
-@description('Network security group to control traffic on the vnet')
-resource nsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
-  name: 'nsg'
-  location: location
-  properties: {
-    securityRules: [
-      {
-        name: 'DenyAllInBound'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          sourceAddressPrefix: '*'
-          destinationPortRange: '*'
-          destinationAddressPrefix: '*'
-          access: 'Deny'
-          priority: 1000
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'HTTP'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          sourceAddressPrefix: '*'
-          destinationPortRange: '80'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 100
-          direction: 'Inbound'
-        }
-      }
-    ]
-  }
-}
+// @description('Network security group to control traffic on the vnet')
+// resource nsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+//   name: 'nsg'
+//   location: location
+//   properties: {
+//     securityRules: [
+//       {
+//         name: 'DenyAllInBound'
+//         properties: {
+//           protocol: 'Tcp'
+//           sourcePortRange: '*'
+//           sourceAddressPrefix: '*'
+//           destinationPortRange: '*'
+//           destinationAddressPrefix: '*'
+//           access: 'Deny'
+//           priority: 1000
+//           direction: 'Inbound'
+//         }
+//       }
+//       {
+//         name: 'HTTP'
+//         properties: {
+//           protocol: 'Tcp'
+//           sourcePortRange: '*'
+//           sourceAddressPrefix: '*'
+//           destinationPortRange: '80'
+//           destinationAddressPrefix: '*'
+//           access: 'Allow'
+//           priority: 100
+//           direction: 'Inbound'
+//         }
+//       }
+//       {
+//         name: 'HTTPS'
+//         properties: {
+//           protocol: 'Tcp'
+//           sourcePortRange: '*'
+//           sourceAddressPrefix: '*'
+//           destinationPortRange: '443'
+//           destinationAddressPrefix: '*'
+//           access: 'Allow'
+//           priority: 101
+//           direction: 'Inbound'
+//         }
+//       }
+//       {
+//         name: 'Allow-AzureBastion-443-Out'
+//         properties: {
+//           protocol: 'Tcp'
+//           sourcePortRange: '*'
+//           sourceAddressPrefix: 'VirtualNetwork'
+//           destinationPortRange: '443'
+//           destinationAddressPrefix: 'Internet'
+//           access: 'Allow'
+//           priority: 110
+//           direction: 'Outbound'
+//         }
+//       }
+//     ]
+//   }
+// }
 
-@description('Network Security Group log')
-resource nsg_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  scope: nsg
-  name: 'nsg-${logAnalyticsName}'
-  properties: {
-    workspaceId: la.id
-    logs: [
-      {
-        category: 'NetworkSecurityGroupEvent'
-        enabled: true
-      }
-      {
-        category: 'NetworkSecurityGroupRuleCounter'
-        enabled: true
-      }
-    ]
-  }
-}
+// @description('Network Security Group log')
+// resource nsg_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+//   scope: nsg
+//   name: 'nsg-${logAnalyticsName}'
+//   properties: {
+//     workspaceId: la.id
+//     logs: [
+//       {
+//         category: 'NetworkSecurityGroupEvent'
+//         enabled: true
+//       }
+//       {
+//         category: 'NetworkSecurityGroupRuleCounter'
+//         enabled: true
+//       }
+//     ]
+//   }
+// }
 
 @description('Virtual Network')
 resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
@@ -85,9 +111,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
         name: 'subnet'
         properties: {
           addressPrefix: '10.0.0.0/24'
-          networkSecurityGroup: {
-            id: nsg.id
-          }
+          // networkSecurityGroup: {
+          //  // id: nsg.id
+          // }
         }
       }
     ]

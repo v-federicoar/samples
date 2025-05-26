@@ -6,14 +6,14 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('The admin user name for both the Windows and Linux virtual machines.')
-param adminUserName string = 'admin-automation'
+param adminUserName string = 'admin'
 
 @secure()
 @description('The admin password for both the Windows and Linux virtual machines.')
 param adminPassword string
 
-@description('The email address configured in the Action Group for receiving non-compliance notifications.')
-param emailAddress string
+// @description('The email address configured in the Action Group for receiving non-compliance notifications.')
+// param emailAddress string
 
 @description('The number of Azure Windows VMs to be deployed as web servers, configured via Desired State Configuration to install IIS.')
 @minValue(0)
@@ -25,6 +25,11 @@ param linuxVMCount int = 1
 
 @description('The Azure VM size. Defaults to an optimally balanced for general purpose, providing sufficient performance for deploying IIS on Windows and NGINX on Linux in testing environments.')
 param vmSize string = 'Standard_A4_v2'
+
+@description('Name for the storage account where the DCS configuration files are stored. This is used by the DSC extension to download the configuration files.')
+param storageAccountName string
+
+//param windowsDSCZipHash string
 
 @description('The DSC configuration object containing a reference to the script that defines the desired state for Windows VMs. By default, it points to a PowerShell script that installs IIS for testing purposes as desired state of the system.')
 param windowsConfiguration object = {
@@ -48,6 +53,58 @@ var windowsVMName = 'vm-win-${location}'
 var linuxVMname = 'vm-linux-${location}'
 
 /*** RESOURCES ***/
+
+
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
+resource storageBlobDataReaderRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+  scope: subscription()
+}
+
+resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+  scope: subscription()
+}
+
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
+resource guestConfigurationResourceContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '088ab73d-1256-47ae-bea9-9de8e7131f31'
+  scope: subscription()
+}
+
+resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
+  name: 'identity-${location}'
+  location: location
+}
+
+resource contributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(userAssignedIdentity.id, 'contributor-role')
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: contributorRole.id
+    principalId: userAssignedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource guestConfigRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(userAssignedIdentity.id, 'guest-config-role')
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: guestConfigurationResourceContributorRole.id
+    principalId: userAssignedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource userAssignedIdentityPolicy 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
+  name: 'id-policy-${location}'
+  location: location
+}
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
+  name: storageAccountName
+}
 
 @description('This Log Analytics workspace stores logs from the regional automation account and the virtual network.')
 resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -73,66 +130,86 @@ resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-@description('The Log Analytics workspace scheduled query rule that trigger alerts based on Virtual Machines with Non-Compliant DSC status.')
-resource la_nonCompliantDsc 'microsoft.insights/scheduledqueryrules@2024-01-01-preview' = {
-  name: 'la-nonCompliantDsc'
-  location: location
+resource storageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(userAssignedIdentity.id, 'storageBlobDataReaderRole')
+  scope: resourceGroup()
   properties: {
-    severity: 3
-    enabled: true
-    evaluationFrequency: 'PT5M'
-    scopes: [
-      la.id
-    ]
-    windowSize: 'PT5M'
-    criteria: {
-      allOf: [
-        {
-          query: alertQuery
-          timeAggregation: 'Count'
-          operator: 'GreaterThan'
-          threshold: 0
-          failingPeriods: {
-            numberOfEvaluationPeriods: 1
-            minFailingPeriodsToAlert: 1
-          }
-        }
-      ]
-    }
-    actions: {
-      actionGroups: [
-        ag_email.id
-      ]
-    }
+    roleDefinitionId: storageBlobDataReaderRole.id
+    principalId: userAssignedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
-@description('The Action Group responsible for sending email notifications when Non-Compliant DSC alerts are triggered.')
-resource ag_email 'microsoft.insights/actionGroups@2024-10-01-preview' = {
-  name: 'ag-email'
-  location: 'Global'
+resource storageBlobDataReaderRoleAssignmentPolicy 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(userAssignedIdentityPolicy.id, 'storageBlobDataReaderRole')
+  scope: resourceGroup()
   properties: {
-    groupShortName: 'emailService'
-    enabled: true
-    emailReceivers: [
-      {
-        name: 'emailAction'
-        emailAddress: emailAddress
-        useCommonAlertSchema: false
-      }
-    ]
+    roleDefinitionId: storageBlobDataReaderRole.id
+    principalId: userAssignedIdentityPolicy.properties.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
-@description('Automation Account creation')
-module automationAccount 'modules/automationAccounts.bicep' = {
-  params:{
-    logAnalyticsName:la.name
-    linuxConfiguration: linuxConfiguration
-    windowsConfiguration: windowsConfiguration
-    location: location
-  }
-}
+// @description('The Log Analytics workspace scheduled query rule that trigger alerts based on Virtual Machines with Non-Compliant DSC status.')
+// resource la_nonCompliantDsc 'microsoft.insights/scheduledqueryrules@2024-01-01-preview' = {
+//   name: 'la-nonCompliantDsc'
+//   location: location
+//   properties: {
+//     severity: 3
+//     enabled: true
+//     evaluationFrequency: 'PT5M'
+//     scopes: [
+//       la.id
+//     ]
+//     windowSize: 'PT5M'
+//     criteria: {
+//       allOf: [
+//         {
+//           query: alertQuery
+//           timeAggregation: 'Count'
+//           operator: 'GreaterThan'
+//           threshold: 0
+//           failingPeriods: {
+//             numberOfEvaluationPeriods: 1
+//             minFailingPeriodsToAlert: 1
+//           }
+//         }
+//       ]
+//     }
+//     actions: {
+//       actionGroups: [
+//         ag_email.id
+//       ]
+//     }
+//   }
+// }
+
+// @description('The Action Group responsible for sending email notifications when Non-Compliant DSC alerts are triggered.')
+// resource ag_email 'microsoft.insights/actionGroups@2024-10-01-preview' = {
+//   name: 'ag-email'
+//   location: 'Global'
+//   properties: {
+//     groupShortName: 'emailService'
+//     enabled: true
+//     emailReceivers: [
+//       {
+//         name: 'emailAction'
+//         emailAddress: emailAddress
+//         useCommonAlertSchema: false
+//       }
+//     ]
+//   }
+// }
+
+// @description('Automation Account creation')
+// module automationAccount 'modules/automationAccounts.bicep' = {
+//   params:{
+//     logAnalyticsName:la.name
+//     linuxConfiguration: linuxConfiguration
+//     windowsConfiguration: windowsConfiguration
+//     location: location
+//   }
+// }
 
 @description('Network creation')
 module network './modules/network.bicep' = {
@@ -182,7 +259,7 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
         imageReference: {
           publisher: 'MicrosoftWindowsServer'
           offer: 'WindowsServer'
-          sku: '2016-Datacenter'
+          sku: '2022-Datacenter'
           version: 'latest'
         }
         osDisk: {
@@ -213,83 +290,25 @@ resource vm_guestConfigExtensionWindows 'Microsoft.Compute/virtualMachines/exten
     properties: {
       publisher: 'Microsoft.GuestConfiguration'
       type: 'ConfigurationforWindows'
-      typeHandlerVersion: '1.0'
+      typeHandlerVersion: '1.29'
       autoUpgradeMinorVersion: true
       enableAutomaticUpgrade: true
       settings: {}
       protectedSettings: {}
     }
   }
-]
+ ]
 
-@description('Windows VM PowerShell DSC extension')
-resource vm_powershellDSCWindows 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
+
+resource blobReadStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for i in range(0, windowsVMCount): {
-    name: '${vm_windows[i].name}/Microsoft.Powershell.DSC'
-    location: location
+    name: guid(storageAccount.id, storageBlobDataReaderRole.id, vm_windows[i].id)
+    scope: storageAccount
     properties: {
-      publisher: 'Microsoft.Powershell'
-      type: 'DSC'
-      typeHandlerVersion: '2.76'
-      autoUpgradeMinorVersion: true
-      protectedSettings: {
-        Items: {
-          registrationKeyPrivate: automationAccount.outputs.keyValue
-        }
-      }
-      settings: {
-        Properties: [
-          {
-            Name: 'RegistrationKey'
-            Value: {
-              UserName: 'PLACEHOLDER_DONOTUSE'
-              Password: 'PrivateSettingsRef:registrationKeyPrivate'
-            }
-            TypeName: 'System.Management.Automation.PSCredential'
-          }
-          {
-            Name: 'RegistrationUrl'
-            #disable-next-line BCP053
-            Value: automationAccount.outputs.registrationURL
-            TypeName: 'System.String'
-          }
-          {
-            Name: 'NodeConfigurationName'
-            Value: '${windowsConfiguration.name}.localhost'
-            TypeName: 'System.String'
-          }
-          {
-            Name: 'ConfigurationMode'
-            Value: 'ApplyAndMonitor'
-            TypeName: 'System.String'
-          }
-          {
-            Name: 'ConfigurationModeFrequencyMins'
-            Value: 15
-            TypeName: 'System.Int32'
-          }
-          {
-            Name: 'RefreshFrequencyMins'
-            Value: 30
-            TypeName: 'System.Int32'
-          }
-          {
-            Name: 'RebootNodeIfNeeded'
-            Value: true
-            TypeName: 'System.Boolean'
-          }
-          {
-            Name: 'ActionAfterReboot'
-            Value: 'ContinueConfiguration'
-            TypeName: 'System.String'
-          }
-          {
-            Name: 'AllowModuleOverwrite'
-            Value: false
-            TypeName: 'System.Boolean'
-          }
-        ]
-      }
+      principalId: vm_windows[i].identity.principalId
+      roleDefinitionId: storageBlobDataReaderRole.id
+      principalType: 'ServicePrincipal' // 'ServicePrincipal' if this was a managed identity
+      description: 'Allows this Microsoft Entra VM to read blobs in this storage container.'
     }
   }
 ]
@@ -335,7 +354,7 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
         imageReference: {
           publisher: 'Canonical'
           offer: 'UbuntuServer'
-          sku: '16.04.0-LTS'
+          sku: '18.04-LTS'
           version: 'latest'
         }
         osDisk: {
@@ -375,27 +394,5 @@ resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensi
   }
 ]
 
-@description('Linux VM DSC extension')
-resource vm_enableDCLExtemsionLinux 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
-  for i in range(0, linuxVMCount): {
-    name: '${vm_linux[i].name}/enabledsc'
-    location: location
-    properties: {
-      publisher: 'Microsoft.OSTCExtensions'
-      type: 'DSCForLinux'
-      typeHandlerVersion: '2.7'
-      autoUpgradeMinorVersion: true
-      settings: {
-        ExtensionAction: 'Register'
-        NodeConfigurationName: '${linuxConfiguration.name}.localhost'
-        RefreshFrequencyMins: 30
-        ConfigurationMode: 'applyAndAutoCorrect'
-        ConfigurationModeFrequencyMins: 15
-        RegistrationUrl: automationAccount.outputs.registrationURL
-      }
-      protectedSettings: {
-        RegistrationKey: automationAccount.outputs.keyValue
-      }
-    }
-  }
-]
+output userAssignedIdentityId string = userAssignedIdentity.id 
+output userAssignedIdentityPolicyId string = userAssignedIdentityPolicy.id

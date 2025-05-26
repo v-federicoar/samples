@@ -1,4 +1,4 @@
-configuration linuxpackage {
+configuration NginxInstall {
 
     Import-DSCResource -Module nx
 
@@ -10,3 +10,5 @@ configuration linuxpackage {
         }
     }
 }
+
+NginxInstall

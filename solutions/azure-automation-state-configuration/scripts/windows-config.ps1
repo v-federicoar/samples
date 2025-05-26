@@ -1,6 +1,6 @@
 configuration windowsfeatures {
 
-    Import-DscResource -ModuleName PsDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDscResources
 
     node localhost {
 
@@ -10,3 +10,5 @@ configuration windowsfeatures {
         }
     }
 }
+
+windowsfeatures
