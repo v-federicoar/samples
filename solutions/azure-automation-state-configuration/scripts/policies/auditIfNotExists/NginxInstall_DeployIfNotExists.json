@@ -1,12 +1,12 @@
 {
     "properties": {
-        "displayName": "FAR -NGINX - Test - TBD",
+        "displayName": "Far -NGINX - Linux - TBD",
         "policyType": "Custom",
         "mode": "Indexed",
-        "description": "FAR -NGINX - Test - TBD",
+        "description": "Far -NGINX - Linux - TBD",
         "metadata": {
             "category": "Guest Configuration",
-            "version": "2.0.0",
+            "version": "1.0.0",
             "requiredProviders": [
                 "Microsoft.GuestConfiguration"
             ],
@@ -14,8 +14,8 @@
                 "name": "NginxInstall",
                 "version": "1.0.0",
                 "contentType": "Custom",
-                "contentUri": "https://stvaletblobs43efoky.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-02T13%3A21Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-26T13%3A21%3A56Z&ske=2025-06-02T13%3A21%3A00Z&sks=b&skv=2022-11-02&sig=gbBdZ%2B%2FJKZ5X3rHTTU792omSrF6IMuW87AaA%2FC%2Fqtnw%3D",
-                "contentHash": "FB4FC3F91062CB877063AC1635C754E4D2F35AF3F045BC25C7387CF57D6FFF3F"
+                "contentUri": "https://stvaletblobs2o1dbud.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-03T13%3A53Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-27T13%3A53%3A46Z&ske=2025-06-03T13%3A53%3A00Z&sks=b&skv=2022-11-02&sig=ASckRKSDHDnfhbG3gRFKLEpDcGLPMsO8efq0EzsiziQ%3D",
+                "contentHash": "4BB316FFFDE5FC3168CF2DB2D2A9ABBCBB5E74A9AA3894C357720F40C0C5E98E"
             }
         },
         "parameters": {
@@ -331,8 +331,8 @@
                                                 "name": "NginxInstall",
                                                 "version": "1.0.0",
                                                 "contentType": "Custom",
-                                                "contentUri": "https://stvaletblobs43efoky.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-02T13%3A21Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-26T13%3A21%3A56Z&ske=2025-06-02T13%3A21%3A00Z&sks=b&skv=2022-11-02&sig=gbBdZ%2B%2FJKZ5X3rHTTU792omSrF6IMuW87AaA%2FC%2Fqtnw%3D",
-                                                "contentHash": "FB4FC3F91062CB877063AC1635C754E4D2F35AF3F045BC25C7387CF57D6FFF3F",
+                                                "contentUri": "https://stvaletblobs2o1dbud.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-03T13%3A53Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-27T13%3A53%3A46Z&ske=2025-06-03T13%3A53%3A00Z&sks=b&skv=2022-11-02&sig=ASckRKSDHDnfhbG3gRFKLEpDcGLPMsO8efq0EzsiziQ%3D",
+                                                "contentHash": "4BB316FFFDE5FC3168CF2DB2D2A9ABBCBB5E74A9AA3894C357720F40C0C5E98E",
                                                 "assignmentType": "ApplyAndAutoCorrect"
                                             }
                                         }
@@ -348,8 +348,8 @@
                                                 "name": "NginxInstall",
                                                 "version": "1.0.0",
                                                 "contentType": "Custom",
-                                                "contentUri": "https://stvaletblobs43efoky.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-02T13%3A21Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-26T13%3A21%3A56Z&ske=2025-06-02T13%3A21%3A00Z&sks=b&skv=2022-11-02&sig=gbBdZ%2B%2FJKZ5X3rHTTU792omSrF6IMuW87AaA%2FC%2Fqtnw%3D",
-                                                "contentHash": "FB4FC3F91062CB877063AC1635C754E4D2F35AF3F045BC25C7387CF57D6FFF3F",
+                                                "contentUri": "https://stvaletblobs2o1dbud.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-03T13%3A53Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-27T13%3A53%3A46Z&ske=2025-06-03T13%3A53%3A00Z&sks=b&skv=2022-11-02&sig=ASckRKSDHDnfhbG3gRFKLEpDcGLPMsO8efq0EzsiziQ%3D",
+                                                "contentHash": "4BB316FFFDE5FC3168CF2DB2D2A9ABBCBB5E74A9AA3894C357720F40C0C5E98E",
                                                 "assignmentType": "ApplyAndAutoCorrect"
                                             }
                                         }
@@ -365,8 +365,8 @@
                                                 "name": "NginxInstall",
                                                 "version": "1.0.0",
                                                 "contentType": "Custom",
-                                                "contentUri": "https://stvaletblobs43efoky.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-02T13%3A21Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-26T13%3A21%3A56Z&ske=2025-06-02T13%3A21%3A00Z&sks=b&skv=2022-11-02&sig=gbBdZ%2B%2FJKZ5X3rHTTU792omSrF6IMuW87AaA%2FC%2Fqtnw%3D",
-                                                "contentHash": "FB4FC3F91062CB877063AC1635C754E4D2F35AF3F045BC25C7387CF57D6FFF3F",
+                                                "contentUri": "https://stvaletblobs2o1dbud.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?se=2025-06-03T13%3A53Z&sp=r&sv=2022-11-02&sr=b&skoid=4d18c03a-7ebc-454d-ac10-88fec62b352f&sktid=888d76fa-54b2-4ced-8ee5-aac1585adee7&skt=2025-05-27T13%3A53%3A46Z&ske=2025-06-03T13%3A53%3A00Z&sks=b&skv=2022-11-02&sig=ASckRKSDHDnfhbG3gRFKLEpDcGLPMsO8efq0EzsiziQ%3D",
+                                                "contentHash": "4BB316FFFDE5FC3168CF2DB2D2A9ABBCBB5E74A9AA3894C357720F40C0C5E98E",
                                                 "assignmentType": "ApplyAndAutoCorrect"
                                             }
                                         }
@@ -379,5 +379,5 @@
             }
         }
     },
-    "name": "1f50c8b3-bd41-42e1-af3b-1bfd9c7dc29f"
+    "name": "d1bae074-aac4-416d-9f68-5eef30fbd972"
 }

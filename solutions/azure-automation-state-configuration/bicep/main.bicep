@@ -6,11 +6,11 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('The admin user name for both the Windows and Linux virtual machines.')
-param adminUserName string = 'admin'
+param adminUserName string = 'faradmin'
 
 @secure()
 @description('The admin password for both the Windows and Linux virtual machines.')
-param adminPassword string
+param adminPassword string = 'Frederic123!'
 
 // @description('The email address configured in the Action Group for receiving non-compliance notifications.')
 // param emailAddress string
