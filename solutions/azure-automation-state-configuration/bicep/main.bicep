@@ -259,7 +259,7 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
         imageReference: {
           publisher: 'MicrosoftWindowsServer'
           offer: 'WindowsServer'
-          sku: '2022-Datacenter'
+          sku: '2016-Datacenter'
           version: 'latest'
         }
         osDisk: {
@@ -354,7 +354,7 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
         imageReference: {
           publisher: 'Canonical'
           offer: 'UbuntuServer'
-          sku: '18.04-LTS'
+          sku: '16.04.0-LTS'
           version: 'latest'
         }
         osDisk: {
