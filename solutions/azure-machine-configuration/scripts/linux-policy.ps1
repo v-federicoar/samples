@@ -1,9 +1,9 @@
 $myguid = [guid]::NewGuid()
 $PolicyConfig      = @{
   PolicyId      = $myguid 
-  ContentUri    = 'https://xx.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?sas'
-  DisplayName   = 'Far -NGINX - Linux - TBD'
-  Description   = 'Far -NGINX - Linux - TBD'
+  ContentUri    = 'https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?$SAS_LX_POLICY'
+  DisplayName   = 'Enable Nginx on Linux VMs'
+  Description   = 'Enable Nginx on Linux VMs'
   Path          = './policies/auditIfNotExists'
   Platform      = 'Linux'
   PolicyVersion = '1.0.0'
