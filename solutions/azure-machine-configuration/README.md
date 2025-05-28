@@ -151,7 +151,7 @@ It is possible view the general compliant situation on Policies
 
 ![Image of Azure Policies compliant on Policy View as seen in the Azure portal.](./images/ComplianceFromPolicies.png)  
 
-I this view is possible to see our Policies definition and assigments  
+In this view is possible to see our Policies definition and assigments  
 
 ![Image of Azure Policies Definition.](./images/PolicyDefinition.png)   
 ![Image of Azure Policies Assigment.](./images/PolicyAssigment.png)  
@@ -166,7 +166,7 @@ It could take hours to detect the issue, remediate and be complaint. After that 
 
 | Parameter | Type | Description | Default |
 |---|---|---|--|
-| adminUserName | string | If deploying virtual machines, the admin user name. | null |
+| adminUserName | string | If deploying virtual machines, the admin user name. | admin-user |
 | adminPassword | securestring | If deploying virtual machines, the admin password. | null |
 | windowsVMCount | int | Number of Windows virtual machines to create in spoke network. | 1 |
 | linuxVMCount | int | Number of Linux virtual machines to create in spoke network. | 1 |
