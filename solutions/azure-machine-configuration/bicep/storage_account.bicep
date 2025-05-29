@@ -14,26 +14,19 @@ param storageAccountName string
 
 /*** EXISTING RESOURCES ***/
 
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. ')
 resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   scope: subscription()
 }
 
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Delegator" privileges. Used by the managed identity of the valet key Azure Function to manage generate SaS tokens.')
-resource storageBlobDelegatorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: 'db58b8e5-c6ad-4a2a-8342-4190687cbf4a'
-  scope: subscription()
-}
-
-/*** NEW RESOURCES ***/
-
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Reader" privileges.')
 resource storageBlobDataReaderRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
   scope: subscription()
 }
 
+@description('Built-in Azure RBAC role that is applied to a resource group to grant "Contributor" privileges. ')
 resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
   scope: subscription()
@@ -44,8 +37,7 @@ resource guestConfigurationResourceContributorRole 'Microsoft.Authorization/role
   name: '088ab73d-1256-47ae-bea9-9de8e7131f31'
   scope: subscription()
 }
-
-/*** RESOURCES ***/
+/*** NEW RESOURCES ***/
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
@@ -95,19 +87,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   }
 }
 
-@description('SaS tokens are created at the account level, allow our identified principal the permissions necessary to create those.')
-resource blobUploadStorageDelegator 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccount.id, storageBlobDelegatorRole.id, principalId)
-  scope: storageAccount
-  properties: {
-    principalId: principalId
-    roleDefinitionId: storageBlobDelegatorRole.id
-    principalType: 'User' // 'ServicePrincipal' if this was a managed identity
-    description: 'Allows this Microsoft Entra principal to create Entra ID-signed SaS tokens for this storage account.'
-  }
-}
-
-@description('User delegation requires the user doing the delegating to SaS to also have the permissions being delgated. So scoping a Data Contributor to the container. In this scenario, technically this principal only needs permissions to create blobs.')
+@description('Allows the principal to upload blobs to the storage account.')
 resource blobContributorUploadStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storageAccount::blobContainers::uploadsContainer.id, storageBlobDataContributorRole.id, principalId)
   scope: storageAccount::blobContainers::uploadsContainer
@@ -121,6 +101,11 @@ resource blobContributorUploadStorage 'Microsoft.Authorization/roleAssignments@2
 
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
   name: 'identity-${location}'
+  location: location
+}
+
+resource policyUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
+  name: 'id-policy-${location}'
   location: location
 }
 
@@ -145,11 +130,11 @@ resource guestConfigRoleAssignment 'Microsoft.Authorization/roleAssignments@2022
 }
 
 resource storageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(userAssignedIdentity.id, 'storageBlobDataReaderRole')
-  scope: resourceGroup()
+  name: guid(policyUserAssignedIdentity.id, 'storageBlobDataReaderRole')
+  scope: storageAccount::blobContainers::uploadsContainer
   properties: {
     roleDefinitionId: storageBlobDataReaderRole.id
-    principalId: userAssignedIdentity.properties.principalId
+    principalId: policyUserAssignedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -157,3 +142,4 @@ resource storageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssign
 output storageAccountName string = storageAccount.name
 output containerName string = 'windows-machine-configuration'
 output userAssignedIdentityId string = userAssignedIdentity.id 
+output policyUserAssignedIdentityId string = policyUserAssignedIdentity.id

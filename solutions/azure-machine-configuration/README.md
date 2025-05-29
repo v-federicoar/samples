@@ -38,6 +38,8 @@ Azure Storage requires access via RBAC. This script assigns the necessary roles 
   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
   STORAGE_ACCOUNT_NAME="stpolices$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
   az deployment group create --resource-group rg-machine-configuration-eastus --template-file ./bicep/storage_account.bicep  -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
+
+  POLICY_USER_ASSIGNED_IDENTITY=$(az deployment group show --resource-group rg-machine-configuration-eastus --name storage_account --query "properties.outputs.policyUserAssignedIdentityId.value" --output tsv)
 ```
 
 ## Azure Policy Creation
@@ -81,21 +83,15 @@ The package must be published, and a URL with SAS token access should be generat
 
  az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windows-machine-configuration --file ./scripts/WindowsFeatures.zip --auth-mode login  --overwrite
  
-EXPIRY_DATE=$(date -u -d "+7 days" '+%Y-%m-%dT%H:%MZ')
-
-SAS_LX_POLICY=$(az storage blob generate-sas --account-name $STORAGE_ACCOUNT_NAME --container-name windows-machine-configuration --name NginxInstall.zip  --permissions r --auth-mode login --as-user --expiry $EXPIRY_DATE --output tsv)
-
-URL_LX_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip?$SAS_LX_POLICY"
+URL_LX_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip"
 echo $URL_LX_CONTENT
 
-SAS_WIN_POLICY=$(az storage blob generate-sas --account-name $STORAGE_ACCOUNT_NAME --container-name windows-machine-configuration --name WindowsFeatures.zip  --permissions r --auth-mode login --as-user --expiry $EXPIRY_DATE --output tsv)
-
-URL_WIN_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/WindowsFeatures.zip?$SAS_WIN_POLICY"
+URL_WIN_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/WindowsFeatures.zip"
 echo $URL_WIN_CONTENT
 ```
 ### Generate Policies
-On linux-policy.ps1, change the ContentUri for the content of $URL_LX_CONTENT.  
-On windows-policy.ps1, change the ContentUri for the content of $URL_WIN_CONTENT.
+On linux-policy.ps1, change the ContentUri for the content of $URL_LX_CONTENT and ManagedIdentityResourceId by $POLICY_USER_ASSIGNED_IDENTITY  
+On windows-policy.ps1, change the ContentUri for the content of $URL_WIN_CONTENT and ManagedIdentityResourceId by $POLICY_USER_ASSIGNED_IDENTITY  
 
 ```powershell
    # Generate Policy Definition
@@ -139,8 +135,10 @@ Run the following command to initiate the deployment. If you would like to adjus
 
 To apply policies using Azure Machine Configuration, the virtual machine must have the Guest Configuration extension installed and be enabled with a system-assigned managed identity, which allows it to authenticate and interact securely with the configuration service to download and enforce policy assignments.  
 
+To successfully download the Desired State Configuration (DSC), the virtual machine must be assigned the policy user-assigned managed identity that has the Storage Blob Data Reader role.
+
 ```bash
-az deployment group create --resource-group rg-machine-configuration-eastus -f ./bicep/main.bicep
+az deployment group create --resource-group rg-machine-configuration-eastus -f ./bicep/main.bicep -p policyUserAssignedIdentityId=$POLICY_USER_ASSIGNED_IDENTITY
 ```
 ## Monitoring 
 Each virtual machine includes visibility into the Azure Policies applied to it, along with its current compliance status, enabling users to track and manage configuration adherence effectively.  

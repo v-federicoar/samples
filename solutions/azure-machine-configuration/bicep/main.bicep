@@ -6,11 +6,11 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('The admin user name for both the Windows and Linux virtual machines.')
-param adminUserName string = 'admin-user'
+param adminUserName string = 'faradmin'
 
 @secure()
 @description('The admin password for both the Windows and Linux virtual machines.')
-param adminPassword string
+param adminPassword string = 'Frederic135!'
 
 // @description('The email address configured in the Action Group for receiving non-compliance notifications.')
 // param emailAddress string
@@ -26,6 +26,8 @@ param linuxVMCount int = 1
 @description('The Azure VM size. Defaults to an optimally balanced for general purpose, providing sufficient performance for deploying IIS on Windows and NGINX on Linux in testing environments.')
 param vmSize string = 'Standard_A4_v2'
 
+@description('User identity ID to be assignd to the VM with permissions to download the DSC configuration from the storage account.')
+param policyUserAssignedIdentityId string
 
 /*** VARIABLES ***/
 
@@ -59,7 +61,6 @@ resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
     }
   }
 }
-
 
 // @description('The Log Analytics workspace scheduled query rule that trigger alerts based on Virtual Machines with Non-Compliant DSC status.')
 // resource la_nonCompliantDsc 'microsoft.insights/scheduledqueryrules@2024-01-01-preview' = {
@@ -146,8 +147,11 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
     name: '${windowsVMName}${i}'
     location: location
     identity: {
-      // It is required by the Guest Configuration extension.
-      type: 'SystemAssigned'
+      // SystemAssigned is required by the Guest Configuration extension. UserAssigned is required to download the DSC configuration from the storage account
+      type: 'SystemAssigned, UserAssigned'
+      userAssignedIdentities: {
+        '${policyUserAssignedIdentityId}': {}
+      }
     }
     properties: {
       hardwareProfile: {
@@ -208,7 +212,7 @@ resource vm_guestConfigExtensionWindows 'Microsoft.Compute/virtualMachines/exten
       protectedSettings: {}
     }
   }
- ]
+]
 
 @description('Create Network Interfaces and Public Ips for Linux VMS')
 module linuxVMNetworkResources './modules/vmNetworkResources.bicep' = {
@@ -226,8 +230,11 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
     name: '${linuxVMname}${i}'
     location: location
     identity: {
-      // It is required by the Guest Configuration extension.
-      type: 'SystemAssigned'
+      // SystemAssigned is required by the Guest Configuration extension. UserAssigned is required to download the DSC configuration from the storage account
+      type: 'SystemAssigned, UserAssigned'
+      userAssignedIdentities: {
+        '${policyUserAssignedIdentityId}': {}
+      }
     }
     properties: {
       hardwareProfile: {
@@ -250,8 +257,8 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
       storageProfile: {
         imageReference: {
           publisher: 'Canonical'
-          offer: 'UbuntuServer'
-          sku: '16.04.0-LTS'
+          offer: '0001-com-ubuntu-server-focal'
+          sku: '20_04-lts'
           version: 'latest'
         }
         osDisk: {
@@ -290,5 +297,3 @@ resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensi
     }
   }
 ]
-
-
