@@ -6,11 +6,11 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('The admin user name for both the Windows and Linux virtual machines.')
-param adminUserName string = 'faradmin'
+param adminUserName string = 'user-admin'
 
 @secure()
 @description('The admin password for both the Windows and Linux virtual machines.')
-param adminPassword string = 'Frederic135!'
+param adminPassword string
 
 // @description('The email address configured in the Action Group for receiving non-compliance notifications.')
 // param emailAddress string
@@ -113,16 +113,6 @@ resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 //   }
 // }
 
-// @description('Automation Account creation')
-// module automationAccount 'modules/automationAccounts.bicep' = {
-//   params:{
-//     logAnalyticsName:la.name
-//     linuxConfiguration: linuxConfiguration
-//     windowsConfiguration: windowsConfiguration
-//     location: location
-//   }
-// }
-
 @description('Network creation')
 module network './modules/network.bicep' = {
   params: {
@@ -174,7 +164,7 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
         imageReference: {
           publisher: 'MicrosoftWindowsServer'
           offer: 'WindowsServer'
-          sku: '2016-Datacenter'
+          sku: '2022-Datacenter'
           version: 'latest'
         }
         osDisk: {
@@ -200,7 +190,7 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
 resource vm_guestConfigExtensionWindows 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
   for i in range(0, windowsVMCount): {
     parent: vm_windows[i]
-    name: 'AzurePolicyforWindows${vm_windows[i].name}'
+    name: 'AzurePolicyforWindows'
     location: location
     properties: {
       publisher: 'Microsoft.GuestConfiguration'
@@ -284,7 +274,7 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
 resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
   for i in range(0, linuxVMCount): {
     parent: vm_linux[i]
-    name: 'Microsoft.AzurePolicyforLinux${vm_linux[i].name}'
+    name: 'Microsoft.AzurePolicyforLinux'
     location: location
     properties: {
       publisher: 'Microsoft.GuestConfiguration'
