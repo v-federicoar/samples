@@ -76,7 +76,7 @@ The expected output is a .zip package that includes the .mof, metadata, and any 
 ```
 
 ### Upload configurations to Azure Storage
-The package must be published, and a URL with SAS token access should be generated to allow the Guest Configuration Extension to download it later.
+The package must be published.
 
 ```bash
  az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windows-machine-configuration --file ./scripts/NginxInstall.zip --auth-mode login  --overwrite
