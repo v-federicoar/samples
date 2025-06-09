@@ -1,6 +1,6 @@
 configuration NginxInstall {
 
-    Import-DscResource -ModuleName nx
+    Import-DscResource -ModuleName nxtools
 
     Node "localhost" {
 

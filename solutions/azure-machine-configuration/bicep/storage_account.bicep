@@ -82,7 +82,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
 
     @description('The blob container that SaS tokens will be generated for.')
     resource uploadsContainer 'containers' = {
-      name: 'windows-machine-configuration'
+      name: 'windowsmachineconfiguration'
     }
   }
 }
@@ -140,6 +140,6 @@ resource storageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssign
 }
 
 output storageAccountName string = storageAccount.name
-output containerName string = 'windows-machine-configuration'
+output containerName string = 'windowsmachineconfiguration'
 output userAssignedIdentityId string = userAssignedIdentity.id 
 output policyUserAssignedIdentityId string = policyUserAssignedIdentity.id

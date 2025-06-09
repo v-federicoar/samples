@@ -4,7 +4,7 @@
 $myguid = [guid]::NewGuid()
 $PolicyConfig      = @{
   PolicyId      = $myguid 
-  ContentUri    = 'https://xx.blob.core.windows.net/windows-machine-configuration/TimeZoneCustom.zip?sas'
+  ContentUri    = 'https://xx.blob.core.windows.net/windowsmachineconfiguration/TimeZoneCustom.zip?sas'
   DisplayName   = 'Far - Time Zone Custom Policy - Test - TBD'
   Description   = 'Far - Time Zone Custom Policy - Test - TBD'
   Path          = './policies/auditIfNotExists'

@@ -1,7 +1,7 @@
 $myguid = [guid]::NewGuid()
 $PolicyConfig      = @{
   PolicyId      = $myguid 
-  ContentUri    = 'https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/WindowsFeatures.zip'
+  ContentUri    = 'https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windowsmachineconfiguration/WindowsFeatures.zip'
   DisplayName   = 'Enable Windows Features - Web Server'
   Description   = 'Enable Windows Features - Web Server'
   Path          = './policies/auditIfNotExists'

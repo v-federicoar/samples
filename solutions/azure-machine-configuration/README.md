@@ -51,7 +51,7 @@ It section requires:
 * GuestConfiguration: This module is used to create and manage guest configuration packages and policies. It includes cmdlets like New-GuestConfigurationPolicy and Get-GuestConfigurationPackageComplianceStatus
 * Az.Resources for commands like New-AzPolicyDefinition, New-AzPolicyAssignment
 * Az.Accounts. Required for authentication and context management. Use Connect-AzAccount and Set-AzContext to authenticate and select the correct subscription 
-* Nx module to compile the linux Script
+* Nxtools module to compile the linux Script
 
 ```powershell
   cd scripts
@@ -79,14 +79,14 @@ The expected output is a .zip package that includes the .mof, metadata, and any 
 The package must be published.
 
 ```bash
- az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windows-machine-configuration --file ./scripts/NginxInstall.zip --auth-mode login  --overwrite
+ az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windowsmachineconfiguration --file ./scripts/NginxInstall.zip --auth-mode login  --overwrite
 
- az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windows-machine-configuration --file ./scripts/WindowsFeatures.zip --auth-mode login  --overwrite
+ az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windowsmachineconfiguration --file ./scripts/WindowsFeatures.zip --auth-mode login  --overwrite
  
-URL_LX_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/NginxInstall.zip"
+URL_LX_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windowsmachineconfiguration/NginxInstall.zip"
 echo $URL_LX_CONTENT
 
-URL_WIN_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windows-machine-configuration/WindowsFeatures.zip"
+URL_WIN_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windowsmachineconfiguration/WindowsFeatures.zip"
 echo $URL_WIN_CONTENT
 ```
 ### Generate Policies
@@ -140,6 +140,13 @@ To successfully download the Desired State Configuration (DSC), the virtual mach
 ```bash
 az deployment group create --resource-group rg-machine-configuration-eastus -f ./bicep/main.bicep -p policyUserAssignedIdentityId=$POLICY_USER_ASSIGNED_IDENTITY
 ```
+## Check Policy download
+The solution has Azure Bastion deployed. You can log in to the Azure VM and inspect the Guest Extension.
+
+Here where are the [client Guest Configuration log](https://learn.microsoft.com/azure/governance/machine-configuration/overview#client-log-files) file for more details.  
+
+Within the GuestConfig/Configuration folder, you should find the downloaded policies.   
+
 ## Monitoring 
 Each virtual machine includes visibility into the Azure Policies applied to it, along with its current compliance status, enabling users to track and manage configuration adherence effectively.  
 

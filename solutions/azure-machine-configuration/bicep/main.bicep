@@ -274,12 +274,12 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
 resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
   for i in range(0, linuxVMCount): {
     parent: vm_linux[i]
-    name: 'Microsoft.AzurePolicyforLinux'
+    name: 'AzurePolicyforLinux'
     location: location
     properties: {
       publisher: 'Microsoft.GuestConfiguration'
       type: 'ConfigurationForLinux'
-      typeHandlerVersion: '1.0'
+      typeHandlerVersion: '1.26'
       autoUpgradeMinorVersion: true
       enableAutomaticUpgrade: true
       settings: {}

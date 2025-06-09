@@ -1,7 +1,7 @@
 $myguid = [guid]::NewGuid()
 $PolicyConfig      = @{
   PolicyId      = $myguid 
-  ContentUri    = 'https://xx.blob.core.windows.net/windows-machine-configuration/WindowsFeatures.zip?sas'
+  ContentUri    = 'https://xx.blob.core.windows.net/windowsmachineconfiguration/WindowsFeatures.zip?sas'
   DisplayName   = 'Far - Windows Feature Policy - Test - TBD'
   Description   = 'Far - Windows Feature Policy - Test - TBD'
   Path          = './policies/auditIfNotExists'
