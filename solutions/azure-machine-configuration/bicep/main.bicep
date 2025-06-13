@@ -6,11 +6,11 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('The admin user name for both the Windows and Linux virtual machines.')
-param adminUserName string = 'faradmin'
+param adminUserName string = 'user-admin'
 
 @secure()
 @description('The admin password for both the Windows and Linux virtual machines.')
-param adminPassword string = 'Frederic123!'
+param adminPassword string
 
 // @description('The email address configured in the Action Group for receiving non-compliance notifications.')
 // param emailAddress string
@@ -26,24 +26,8 @@ param linuxVMCount int = 1
 @description('The Azure VM size. Defaults to an optimally balanced for general purpose, providing sufficient performance for deploying IIS on Windows and NGINX on Linux in testing environments.')
 param vmSize string = 'Standard_A4_v2'
 
-@description('Name for the storage account where the DCS configuration files are stored. This is used by the DSC extension to download the configuration files.')
-param storageAccountName string
-
-//param windowsDSCZipHash string
-
-@description('The DSC configuration object containing a reference to the script that defines the desired state for Windows VMs. By default, it points to a PowerShell script that installs IIS for testing purposes as desired state of the system.')
-param windowsConfiguration object = {
-  name: 'windowsfeatures'
-  description: 'A configuration for installing IIS.'
-  script: 'https://raw.githubusercontent.com/mspnp/samples/main/solutions/azure-automation-state-configuration/scripts/windows-config.ps1'
-}
-
-@description('The DSC configuration object containing a reference to the script that defines the desired state for Linux VMs. By default, it points to a PowerShell script that installs NGINX for testing purposes as desired state of the system.')
-param linuxConfiguration object = {
-  name: 'linuxpackage'
-  description: 'A configuration for installing Nginx.'
-  script: 'https://raw.githubusercontent.com/mspnp/samples/main/solutions/azure-automation-state-configuration/scripts/linux-config.ps1'
-}
+@description('User identity ID to be assignd to the VM with permissions to download the DSC configuration from the storage account.')
+param policyUserAssignedIdentityId string
 
 /*** VARIABLES ***/
 
@@ -53,58 +37,6 @@ var windowsVMName = 'vm-win-${location}'
 var linuxVMname = 'vm-linux-${location}'
 
 /*** RESOURCES ***/
-
-
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
-resource storageBlobDataReaderRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-  scope: subscription()
-}
-
-resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-  scope: subscription()
-}
-
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
-resource guestConfigurationResourceContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '088ab73d-1256-47ae-bea9-9de8e7131f31'
-  scope: subscription()
-}
-
-resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
-  name: 'identity-${location}'
-  location: location
-}
-
-resource contributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(userAssignedIdentity.id, 'contributor-role')
-  scope: resourceGroup()
-  properties: {
-    roleDefinitionId: contributorRole.id
-    principalId: userAssignedIdentity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource guestConfigRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(userAssignedIdentity.id, 'guest-config-role')
-  scope: resourceGroup()
-  properties: {
-    roleDefinitionId: guestConfigurationResourceContributorRole.id
-    principalId: userAssignedIdentity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource userAssignedIdentityPolicy 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
-  name: 'id-policy-${location}'
-  location: location
-}
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
-  name: storageAccountName
-}
 
 @description('This Log Analytics workspace stores logs from the regional automation account and the virtual network.')
 resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -127,26 +59,6 @@ resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
       query: alertQuery
       version: 2
     }
-  }
-}
-
-resource storageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(userAssignedIdentity.id, 'storageBlobDataReaderRole')
-  scope: resourceGroup()
-  properties: {
-    roleDefinitionId: storageBlobDataReaderRole.id
-    principalId: userAssignedIdentity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource storageBlobDataReaderRoleAssignmentPolicy 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(userAssignedIdentityPolicy.id, 'storageBlobDataReaderRole')
-  scope: resourceGroup()
-  properties: {
-    roleDefinitionId: storageBlobDataReaderRole.id
-    principalId: userAssignedIdentityPolicy.properties.principalId
-    principalType: 'ServicePrincipal'
   }
 }
 
@@ -201,16 +113,6 @@ resource storageBlobDataReaderRoleAssignmentPolicy 'Microsoft.Authorization/role
 //   }
 // }
 
-// @description('Automation Account creation')
-// module automationAccount 'modules/automationAccounts.bicep' = {
-//   params:{
-//     logAnalyticsName:la.name
-//     linuxConfiguration: linuxConfiguration
-//     windowsConfiguration: windowsConfiguration
-//     location: location
-//   }
-// }
-
 @description('Network creation')
 module network './modules/network.bicep' = {
   params: {
@@ -235,8 +137,11 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
     name: '${windowsVMName}${i}'
     location: location
     identity: {
-      // It is required by the Guest Configuration extension.
-      type: 'SystemAssigned'
+      // SystemAssigned is required by the Guest Configuration extension. UserAssigned is required to download the DSC configuration from the storage account
+      type: 'SystemAssigned, UserAssigned'
+      userAssignedIdentities: {
+        '${policyUserAssignedIdentityId}': {}
+      }
     }
     properties: {
       hardwareProfile: {
@@ -259,7 +164,7 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
         imageReference: {
           publisher: 'MicrosoftWindowsServer'
           offer: 'WindowsServer'
-          sku: '2016-Datacenter'
+          sku: '2022-Datacenter'
           version: 'latest'
         }
         osDisk: {
@@ -285,7 +190,7 @@ resource vm_windows 'Microsoft.Compute/virtualMachines@2024-11-01' = [
 resource vm_guestConfigExtensionWindows 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
   for i in range(0, windowsVMCount): {
     parent: vm_windows[i]
-    name: 'AzurePolicyforWindows${vm_windows[i].name}'
+    name: 'AzurePolicyforWindows'
     location: location
     properties: {
       publisher: 'Microsoft.GuestConfiguration'
@@ -295,20 +200,6 @@ resource vm_guestConfigExtensionWindows 'Microsoft.Compute/virtualMachines/exten
       enableAutomaticUpgrade: true
       settings: {}
       protectedSettings: {}
-    }
-  }
- ]
-
-
-resource blobReadStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
-  for i in range(0, windowsVMCount): {
-    name: guid(storageAccount.id, storageBlobDataReaderRole.id, vm_windows[i].id)
-    scope: storageAccount
-    properties: {
-      principalId: vm_windows[i].identity.principalId
-      roleDefinitionId: storageBlobDataReaderRole.id
-      principalType: 'ServicePrincipal' // 'ServicePrincipal' if this was a managed identity
-      description: 'Allows this Microsoft Entra VM to read blobs in this storage container.'
     }
   }
 ]
@@ -329,8 +220,11 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
     name: '${linuxVMname}${i}'
     location: location
     identity: {
-      // It is required by the Guest Configuration extension.
-      type: 'SystemAssigned'
+      // SystemAssigned is required by the Guest Configuration extension. UserAssigned is required to download the DSC configuration from the storage account
+      type: 'SystemAssigned, UserAssigned'
+      userAssignedIdentities: {
+        '${policyUserAssignedIdentityId}': {}
+      }
     }
     properties: {
       hardwareProfile: {
@@ -353,8 +247,8 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
       storageProfile: {
         imageReference: {
           publisher: 'Canonical'
-          offer: 'UbuntuServer'
-          sku: '16.04.0-LTS'
+          offer: '0001-com-ubuntu-server-focal'
+          sku: '20_04-lts'
           version: 'latest'
         }
         osDisk: {
@@ -380,12 +274,12 @@ resource vm_linux 'Microsoft.Compute/virtualMachines@2024-11-01' = [
 resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = [
   for i in range(0, linuxVMCount): {
     parent: vm_linux[i]
-    name: 'Microsoft.AzurePolicyforLinux${vm_linux[i].name}'
+    name: 'AzurePolicyforLinux'
     location: location
     properties: {
       publisher: 'Microsoft.GuestConfiguration'
       type: 'ConfigurationForLinux'
-      typeHandlerVersion: '1.0'
+      typeHandlerVersion: '1.26'
       autoUpgradeMinorVersion: true
       enableAutomaticUpgrade: true
       settings: {}
@@ -393,6 +287,3 @@ resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensi
     }
   }
 ]
-
-output userAssignedIdentityId string = userAssignedIdentity.id 
-output userAssignedIdentityPolicyId string = userAssignedIdentityPolicy.id
