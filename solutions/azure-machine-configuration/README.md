@@ -51,46 +51,76 @@ The Bicep template also deploys two User-Assigned Managed Identities:
 ```
 
 ## Azure Policy Creation
-Custom policies using DSC in Azure are built on the Guest Configuration framework, which allows administrators to define and enforce configuration baselines across Windows and Linux machines. These policies are authored using PowerShell DSC resources and compiled into MOF (Managed Object Format) files. The process typically involves creating a DSC resource, defining a configuration, compiling it, and packaging it into a ZIP file. This package is then published and assigned as an Azure Policy. Azure Policy evaluates the configuration against the target machines and reports compliance.  
+Custom policies using Desired State Configuration (DSC) in Azure are built on the **Guest Configuration** framework. This framework enables administrators to define and enforce configuration baselines across both Windows and Linux machines.  
 
-It section requires:
-* PowerShell 7 is required for authoring and compiling DSC configurations
-* PSDscResources: This module contains a collection of commonly used DSC resources.
-* GuestConfiguration: This module is used to create and manage guest configuration packages and policies. It includes cmdlets like New-GuestConfigurationPolicy and Get-GuestConfigurationPackageComplianceStatus
-* Az.Resources for commands like New-AzPolicyDefinition, New-AzPolicyAssignment
-* Az.Accounts. Required for authentication and context management. Use Connect-AzAccount and Set-AzContext to authenticate and select the correct subscription 
-* Nxtools module to compile the linux Script
+These policies are authored using PowerShell DSC resources and compiled into MOF (Managed Object Format) files. The typical workflow includes:  
+
+1. Creating a DSC resource.
+2. Defining the configuration.
+3. Compiling it into a MOF file.
+4. Packaging the output into a .zip file.
+5. Publishing and assigning the package as an Azure Policy.  
+
+Once assigned, **Azure Policy** evaluates the configuration on target machines and reports compliance status.  
+
+### Prerequisites
+
+To author and deploy custom guest configuration policies, ensure the following tools and modules are installed:
+
+* **PowerShell 7** – Required for authoring and compiling DSC configurations.
+* **PSDscResources** – A powershell module containing commonly used DSC resources.
+* **GuestConfiguration** – A powershell module which provides cmdlets like New-GuestConfigurationPolicy and Get-GuestConfigurationPackageComplianceStatus to manage guest configuration packages and policies.
+* **Az.Resources** – Required for commands such as New-AzPolicyDefinition and New-AzPolicyAssignment.
+* **Az.Accounts** – Used for authentication and context management. Use Connect-AzAccount and Set-AzContext to authenticate and select the appropriate subscription.
+* **Nxtools** – A powershell module used to compile Linux-based DSC scripts. It is an open-source module to help make managing Linux systems easier for PowerShell users. The module helps in managing common tasks such as: Managing users and groups,Performing file system operations, Managing services, Performing archive operations,Managing packages. The module includes class-based DSC resources for Linux and built-in machine configuration packages.
 
 ```powershell
+  # Navigate to the Scripts Directory
   cd scripts
 ```
 
-### Create mof files
+### Create MOF Files
 
-We have the DSC script for linux and Windows and we are going to execute the PowerShell scripts.
-A MOF file (Managed Object Format) is a compiled output of a PowerShell Desired State Configuration (DSC) script that defines the desired state of a system. It contains the configuration instructions in a standardized format that can be interpreted by the Local Configuration Manager (LCM) on a target machine to enforce or audit system settings.
+This step involves generating **MOF (Managed Object Format)** files from PowerShell DSC scripts for both Linux and Windows environments.  
+
+A MOF file is the compiled output of a PowerShell Desired State Configuration (DSC) script. It defines the desired state of a system in a standardized format that can be interpreted by the Local Configuration Manager (LCM) on a target machine. The LCM uses this file to enforce or audit system settings.  
+
+You can generate the MOF files by running the following scripts:  
 
 ```powershell
   ./linux-config.ps1   # It will generate ./NginxInstall/localhost.mof
   ./windows-config.ps1 # It will generate ./windowsfeatures/localhost.mof
 ```
+Each script compiles its respective configuration and outputs the MOF file into a subdirectory named after the configuration.  
+
 ### Package Configuration 
-The New-GuestConfigurationPackage cmdlet is used to create a guest configuration package from a compiled .mof file, which defines the desired state of a system using PowerShell DSC. This package is then used to audit or enforce configuration compliance on Azure or Arc-enabled machines through Azure Policy.
-The expected output is a .zip package that includes the .mof, metadata, and any required DSC resources, ready to be published and assigned as a custom policy in Azure.
+Once the MOF files are generated, the next step is to package them into a format that Azure Policy can use.  
+
+The New-GuestConfigurationPackage cmdlet is used to create a Guest Configuration package from a compiled .mof file. This package includes:  
+
+* The .mof file (defining the desired system state),
+* Metadata,
+* Any required DSC resources.
+
+The resulting .zip file is ready to be published and assigned as a custom policy in Azure. Once assigned, Azure Policy uses this package to audit or enforce configuration compliance on Azure or Arc-enabled machines.  
+
+Run the following scripts to generate the packages:  
 
 ```powershell
   ./linux-package.ps1   # It will generate ./NginxInstall.zip
   ./windows-package.ps1 # It will generate ./WindowsFeatures.zip
 ```
+Each script packages the corresponding MOF and resources into a ZIP file, preparing it for policy definition and assignment.  
 
-### Upload configurations to Azure Storage
-The package must be published.
+### Upload Configuration to Azure Storage
+Once the configuration packages (.zip files) are created, they must be uploaded to an Azure Storage Account. These packages will be referenced by Azure Policy during assignment and evaluation.  
 
 ```bash
  az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windowsmachineconfiguration --file ./scripts/NginxInstall.zip --auth-mode login  --overwrite
 
  az storage blob upload --account-name $STORAGE_ACCOUNT_NAME --container-name windowsmachineconfiguration --file ./scripts/WindowsFeatures.zip --auth-mode login  --overwrite
  
+# After uploading, you can construct the URLs to reference these packages in your policy definitions:
 URL_LX_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windowsmachineconfiguration/NginxInstall.zip"
 echo $URL_LX_CONTENT
 
@@ -98,8 +128,8 @@ URL_WIN_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windowsmach
 echo $URL_WIN_CONTENT
 ```
 ### Generate Policies
-On linux-policy.ps1, change the ContentUri for the content of $URL_LX_CONTENT and ManagedIdentityResourceId by $POLICY_USER_ASSIGNED_IDENTITY  
-On windows-policy.ps1, change the ContentUri for the content of $URL_WIN_CONTENT and ManagedIdentityResourceId by $POLICY_USER_ASSIGNED_IDENTITY  
+On linux-policy.ps1, change the ContentUri for the content of $URL_LX_CONTENT and ManagedIdentityResourceId by $POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY  
+On windows-policy.ps1, change the ContentUri for the content of $URL_WIN_CONTENT and ManagedIdentityResourceId by $POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY  
 
 ```powershell
    # Generate Policy Definition
