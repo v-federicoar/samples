@@ -126,20 +126,31 @@ echo $URL_LX_CONTENT
 
 URL_WIN_CONTENT="https://$STORAGE_ACCOUNT_NAME.blob.core.windows.net/windowsmachineconfiguration/WindowsFeatures.zip"
 echo $URL_WIN_CONTENT
-```
-### Generate Policies
-On linux-policy.ps1, change the ContentUri for the content of $URL_LX_CONTENT and ManagedIdentityResourceId by $POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY  
-On windows-policy.ps1, change the ContentUri for the content of $URL_WIN_CONTENT and ManagedIdentityResourceId by $POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY  
+```  
+
+### Generate and Deploy Policies
+Before generating the policy definitions, make sure to update the following placeholders in the scripts:  
+
+In linux-policy.ps1, replace:  
+* ContentUri with the value of $URL_LX_CONTENT
+* ManagedIdentityResourceId with $POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY  
+
+In windows-policy.ps1, replace:
+* ContentUri with the value of $URL_WIN_CONTENT
+* ManagedIdentityResourceId with $POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY  
+
+These values ensure that the policy correctly references the uploaded configuration package and uses the appropriate managed identity for access.  
 
 ```powershell
    # Generate Policy Definition
-  ./linux-policy.ps1   # It will generate the policy definition at .\policies\auditIfNotExists\NginxInstall_DeployIfNotExists.json
-  ./windows-policy.ps1 # It will generate the policy definition at .\policies\auditIfNotExists\WindowsFeatures_DeployIfNotExists.json
+  ./linux-policy.ps1   # Outputs: .\policies\auditIfNotExists\NginxInstall_DeployIfNotExists.json
+  ./windows-policy.ps1 # Outputs: .\policies\auditIfNotExists\WindowsFeatures_DeployIfNotExists.json
 
-  # Deploy Policies
+  # Deploy Policies. Use the Azure CLI to create the policy definitions
   New-AzPolicyDefinition -Name 'nginx-install' -Policy ".\policies\auditIfNotExists\NginxInstall_DeployIfNotExists.json"
   New-AzPolicyDefinition -Name 'IIS-install' -Policy ".\policies\auditIfNotExists\WindowsFeatures_DeployIfNotExists.json"
 ```
+These commands register the custom policies in your Azure environment, making them available for assignment to resource scopes such as subscriptions or resource groups.  
 
 ### Assign Policies
 Assign the policy to work aganst any virtual machine in our resoruce group. 
