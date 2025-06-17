@@ -153,20 +153,25 @@ These values ensure that the policy correctly references the uploaded configurat
 These commands register the custom policies in your Azure environment, making them available for assignment to resource scopes such as subscriptions or resource groups.  
 
 ### Assign Policies
-Assign the policy to work aganst any virtual machine in our resoruce group. 
 
-The Guest Configuration Resource Contributor role is needed to be assigned on the User Assigned Identitty, it allows the identity to:
-* Write guest configuration assignments.  
-* Read and report compliance data from virtual machines.  
-* Deploy the Guest Configuration extension if needed.  
+Once the policy definitions are created, the next step is to assign them to a scope—typically a resource group—so they can evaluate and enforce configuration compliance on virtual machines.  
 
-Contributor Role (optional but common): Grants broad permissions including the ability to create and manage resources, which may be necessary depending on what the policy does.  
+In this example, we assign the policies to all virtual machines within the resource group rg-machine-configuration-eastus.  
 
-This is critical because Azure Policy uses this identity to enforce and monitor the guest configuration on target machines. Without this role, the policy assignment may succeed, but the guest configuration won't be applied or reported correctly.
+The User-Assigned Managed Identity used in the policy assignment must have the following roles:  
+
+* Guest Configuration Resource Contributor (required):
+  * Write guest configuration assignments.
+  * Read and report compliance data from virtual machines.
+  * Deploy the Guest Configuration extension if needed.
+* Contributor (optional but common):
+  Grants broader permissions, including the ability to create and manage resources. This may be necessary depending on the policy’s behavior.
+
+⚠️ Without the proper roles, the policy assignment may succeed, but the guest configuration will not be enforced or reported correctly.
 
 ```powershell
 $ResourceGroup = Get-AzResourceGroup -Name rg-machine-configuration-eastus
-$UserAssignedIdentity = Get-AzUserAssignedIdentity -ResourceGroupName rg-machine-configuration-eastus -Name 'identity-eastus'
+$UserAssignedIdentity = Get-AzUserAssignedIdentity -ResourceGroupName rg-machine-configuration-eastus -Name 'id-policy-assigment-eastus'
 
 $policyDefinitionNginxInstall = Get-AzPolicyDefinition -Name 'nginx-install'
 New-AzPolicyAssignment -Name 'nginx-install' -DisplayName "nginx-install Assignment" -Scope $ResourceGroup.ResourceId  -PolicyDefinition $policyDefinitionNginxInstall -Location 'eastus' -IdentityType 'UserAssigned' -IdentityId $UserAssignedIdentity.Id
@@ -180,38 +185,41 @@ cd..
 
 ## Deploy sample
 
-Run the following command to initiate the deployment. If you would like to adjust the number of virtual machines deployed, update the *windowsVMCount* and *linuxVMCount* values.  
+Run the following command to initiate the deployment. You can customize the number of virtual machines by modifying the windowsVMCount and linuxVMCount parameters in the Bicep template.  
 
-To apply policies using Azure Machine Configuration, the virtual machine must have the Guest Configuration extension installed and be enabled with a system-assigned managed identity, which allows it to authenticate and interact securely with the configuration service to download and enforce policy assignments.  
-
-To successfully download the Desired State Configuration (DSC), the virtual machine must be assigned the policy user-assigned managed identity that has the Storage Blob Data Reader role.
+To apply policies using Azure Machine Configuration, each virtual machine must meet the following requirements:  
+* Guest Configuration extension must be installed.
+* System-assigned managed identity must be enabled to allow secure authentication with the configuration service.
+* The VM must be assigned the user-assigned managed identity used in the policy, which must have the Storage Blob Data Reader role.This allows the VM to download the Desired State Configuration (DSC) package from Azure Storage.
 
 ```bash
-az deployment group create --resource-group rg-machine-configuration-eastus -f ./bicep/main.bicep -p policyUserAssignedIdentityId=$POLICY_USER_ASSIGNED_IDENTITY
+az deployment group create --resource-group rg-machine-configuration-eastus -f ./bicep/main.bicep -p policyUserAssignedIdentityId=$POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY
 ```
 ## Check Policy download
-The solution has Azure Bastion deployed. You can log in to the Azure VM and inspect the Guest Extension.
 
-Here where are the [client Guest Configuration log](https://learn.microsoft.com/azure/governance/machine-configuration/overview#client-log-files) file for more details.  
+To verify that the guest configuration policy has been successfully downloaded and applied, you can inspect the virtual machine using Azure Bastion, which is deployed as part of this solution. Use Azure Bastion to securely connect to the virtual machine without exposing public IPs.
+
+Here where the [client Guest Configuration log](https://learn.microsoft.com/azure/governance/machine-configuration/overview#client-log-files) files are for more details.  
 
 Within the GuestConfig/Configuration folder, you should find the downloaded policies.   
 
 ## Monitoring 
-Each virtual machine includes visibility into the Azure Policies applied to it, along with its current compliance status, enabling users to track and manage configuration adherence effectively.  
+Azure provides built-in visibility into policy compliance at both the virtual machine and policy levels, enabling you to track and manage configuration adherence effectively.  
 
+Each virtual machine displays the Azure Policies applied to it, along with its current compliance status. This allows you to verify whether the guest configuration has been successfully enforced. The policies could take some time to be evaluated and remediated.
 ![Image of Azure Policies compliant on a VM as seen in the Azure portal.](./images/VMPolicies.png)  
 
-It is possible view the general compliant situation on Policies  
+You can also view the overall compliance status from the Azure Policy blade. This view provides a summary of all policy definitions and their assignments, helping you assess compliance across your environment. 
 
 ![Image of Azure Policies compliant on Policy View as seen in the Azure portal.](./images/ComplianceFromPolicies.png)  
 
-In this view is possible to see our Policies definition and assigments  
+You can inspect the details of your custom policy definitions and their corresponding assignments.
 
 ![Image of Azure Policies Definition.](./images/PolicyDefinition.png)   
 ![Image of Azure Policies Assigment.](./images/PolicyAssigment.png)  
 
 
-It could take hours to detect the issue, remediate and be complaint. After that you could check using the VM public ip and call it in a browser.  
+Once compliance is confirmed, you can test the result by accessing the virtual machine using its public IP address—for example, by opening a browser and navigating to the expected service endpoint. 
 
 ![Checking Compliant situation](./images/Checking.png)  
 
@@ -228,12 +236,14 @@ It could take hours to detect the issue, remediate and be complaint. After that 
 | location | string | Deployment location. | resourceGroup().location |
 
 ## Clean Up
+Once you're done testing or demonstrating the solution, you can remove all deployed resources to avoid unnecessary costs and maintain a clean environment.
 
 ```bash
+# This command deletes the entire resource group and all associated resources, including virtual machines, identities, storage accounts, and Azure Bastion
 az group delete -n rg-machine-configuration-eastus  -y
 
+# Remove the custom policy definitions created for the guest configuration
 az policy definition delete --name nginx-install
-
 az policy definition delete --name IIS-install
 
 ```
