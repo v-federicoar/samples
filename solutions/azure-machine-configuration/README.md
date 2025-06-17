@@ -37,17 +37,17 @@ To deploy a custom guest configuration policy in Azure, you’ll need a Storage 
 
 Azure Storage access is managed via RBAC. The provided script assigns the necessary roles to the current user to allow file uploads.  
 
-The bicep template also deploys a couple of user identities. 
-* One will be used for Custom Azure Policies and It will be assigned in the VM. It will have Storage Account Read Road to allow the vm download the policy.
-* The second will be used on the Policy Assigment, It must have Contributor Role and Guest Configuration Resource Contributor Role in the desired scope. 
-Our scope is the resource Group.
+The Bicep template also deploys two User-Assigned Managed Identities:
+
+* Policy VM Identity: Assigned to the virtual machine and policy. It requires Storage Blob Data Reader permissions to download the policy package from the VM.
+* Policy Assignment Identity: Used during policy assignment. It must have Contributor and Guest Configuration Resource Contributor roles. We use Resource Group scope.
 
 ```bash
   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
   STORAGE_ACCOUNT_NAME="stpolices$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
-  az deployment group create --resource-group rg-machine-configuration-eastus --template-file ./bicep/.bicep  -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
+  az deployment group create --resource-group rg-machine-configuration-eastus --template-file ./bicep/guestConfigInfraSetup.bicep  -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
 
-  POLICY_USER_ASSIGNED_IDENTITY=$(az deployment group show --resource-group rg-machine-configuration-eastus --name storage_account --query "properties.outputs.policyUserAssignedIdentityId.value" --output tsv)
+  POLICY_USER_ASSIGNED_IDENTITY=$(az deployment group show --resource-group rg-machine-configuration-eastus --name guestConfigInfraSetup --query "properties.outputs.policyUserAssignedIdentityId.value" --output tsv)
 ```
 
 ## Azure Policy Creation
