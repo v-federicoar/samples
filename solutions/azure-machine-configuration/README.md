@@ -207,7 +207,8 @@ Within the GuestConfig/Configuration folder, you should find the downloaded poli
 Azure provides built-in visibility into policy compliance at both the virtual machine and policy levels, enabling you to track and manage configuration adherence effectively.  
 
 Each virtual machine displays the Azure Policies applied to it, along with its current compliance status. This allows you to verify whether the guest configuration has been successfully enforced. The policies could take some time to be evaluated and remediated.
-![Image of Azure Policies compliant on a VM as seen in the Azure portal.](./images/VMPolicies.png)  
+![Image of Azure Policies compliant on a Windows VM as seen in the Azure portal.](./images/VMPolicies.png)  
+![Image of Azure Policies compliant on a Linux VM as seen in the Azure portal.](./images/VMPoliciesLinux.png)  
 
 You can also view the overall compliance status from the Azure Policy blade. This view provides a summary of all policy definitions and their assignments, helping you assess compliance across your environment. 
 
@@ -221,7 +222,8 @@ You can inspect the details of your custom policy definitions and their correspo
 
 Once compliance is confirmed, you can test the result by accessing the virtual machine using its public IP address—for example, by opening a browser and navigating to the expected service endpoint. 
 
-![Checking Compliant situation](./images/Checking.png)  
+![Checking Windows Compliant situation](./images/Checking.png)  
+![Checking Linux Compliant situation](./images/CheckingLinux.png)  
 
 
 ## Solution deployment parameters
