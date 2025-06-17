@@ -4,12 +4,12 @@ languages:
 - azurecli
 products:
 - azure
-description: These Bicep template samples deploy Azure Machine Configuration scenario, compiles PowerShell Desired State Configuration scripts. The template then deploys 1 to many virtual machines (Windows and Linux), which then uses the compiled configurations to install a webserver on each of the virtual machines.
+description: These Bicep template samples deploy Azure Machine Configuration scenario, and it will compile PowerShell Desired State Configuration scripts. Then, the Bicep template deploys 1 to many virtual machines (Windows and Linux), which then uses the compiled configurations to install a webserver on each of the virtual machines.
 ---
 
 # Azure Machine Configuration
 
-This sample deploys an [Azure Machine Configuration](https://learn.microsoft.com/azure/governance/machine-configuration/) scenario, and it will compile PowerShell Desired State Configuration scripts. The Bicep template then deploys 1 to many virtual machines (Windows and Linux), which then uses the compiled configurations to install a webserver on each of the virtual machines.  
+This sample deploys an [Azure Machine Configuration](https://learn.microsoft.com/azure/governance/machine-configuration/) scenario, and it will compile PowerShell Desired State Configuration scripts. Then, the Bicep template deploys 1 to many virtual machines (Windows and Linux), which then uses the compiled configurations to install a webserver on each of the virtual machines.  
 
 Azure Machine Configuration enables you to audit and enforce configuration settings on both Azure and hybrid (Arc-enabled) machines using code. It leverages PowerShell Desired State Configuration (DSC) to define the desired state of a system and ensures compliance through Azure Policy. It supports custom configuration packages and provides detailed compliance reporting through Azure Resource Graph.  
 
@@ -17,27 +17,35 @@ The main difference between Azure Machine Configuration and Azure Automation Sta
 
 ## Deploy bases
 
-  Azure Command-Line Interface is required
-  The repository need to be clone
+  Before you begin, ensure you have the Azure Command-Line Interface (CLI) installed.
+
+  Clone this repository:
+
   ```bash
     git clone https://github.com/mspnp/samples.git
-    cd ./solutions/azure-machine-configuration
+    cd ./samples/solutions/azure-machine-configuration
   ```
 
-### Create a resource group for the deployment.
+### Create a Resource Group
 
 ```bash
   az group create --name rg-machine-configuration-eastus --location eastus
 ```
 
-### Deploy storage Account and User Manage Identity
-To deploy a custom guest configuration policy in Azure, a Storage Account is required to host the .zip package that contains the compiled .mof file, metadata, and any required DSC resources. This storage location allows Azure Policy to access and distribute the configuration package to target machines.  
-Azure Storage requires access via RBAC. This script assigns the necessary roles to the current user to enable file uploads.
+### Deploy Storage Account and User-Assigned Managed Identities
+To deploy a custom guest configuration policy in Azure, you’ll need a Storage Account to host the .zip package containing the compiled .mof file, metadata, and any required DSC resources. This storage location enables Azure Policy to access and distribute the configuration package to target machines.  
+
+Azure Storage access is managed via RBAC. The provided script assigns the necessary roles to the current user to allow file uploads.  
+
+The bicep template also deploys a couple of user identities. 
+* One will be used for Custom Azure Policies and It will be assigned in the VM. It will have Storage Account Read Road to allow the vm download the policy.
+* The second will be used on the Policy Assigment, It must have Contributor Role and Guest Configuration Resource Contributor Role in the desired scope. 
+Our scope is the resource Group.
 
 ```bash
   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
   STORAGE_ACCOUNT_NAME="stpolices$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
-  az deployment group create --resource-group rg-machine-configuration-eastus --template-file ./bicep/storage_account.bicep  -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
+  az deployment group create --resource-group rg-machine-configuration-eastus --template-file ./bicep/.bicep  -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
 
   POLICY_USER_ASSIGNED_IDENTITY=$(az deployment group show --resource-group rg-machine-configuration-eastus --name storage_account --query "properties.outputs.policyUserAssignedIdentityId.value" --output tsv)
 ```
