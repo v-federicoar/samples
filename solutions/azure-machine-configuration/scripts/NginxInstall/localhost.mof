@@ -1,0 +1,35 @@
+/*
+@TargetNode='localhost'
+@GeneratedBy=v-federicoar
+@GenerationDate=06/19/2025 14:39:50
+@GenerationHost=DESKTOP-HG9KK6L
+*/
+
+instance of nxPackage as $nxPackage1ref
+{
+ResourceID = "[nxPackage]nginx";
+ ModuleName = "nxtools";
+ SourceInfo = "C:\\repositories\\samples\\solutions\\azure-machine-configuration\\scripts\\linux-config.ps1::7::9::nxPackage";
+ Name = "nginx";
+ ModuleVersion = "1.5.0";
+ Ensure = "Present";
+ ConfigurationName = "NginxInstall";
+};
+instance of OMI_ConfigurationDocument
+
+                    {
+ Version="2.0.0";
+
+                        MinimumCompatibleVersion = "1.0.0";
+
+                        CompatibleVersionAdditionalProperties= {"Omi_BaseResource:ConfigurationName"};
+
+                        Author="v-federicoar";
+
+                        GenerationDate="06/19/2025 14:39:50";
+
+                        GenerationHost="DESKTOP-HG9KK6L";
+
+                        Name="NginxInstall";
+
+                    };
