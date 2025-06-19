@@ -104,6 +104,9 @@ resource la_nonCompliantDsc 'microsoft.insights/scheduledqueryrules@2024-01-01-p
       ]
     }
   }
+  dependsOn: [
+    la::la_savedSearches
+  ]
 }
 
 @description('The Action Group responsible for sending email notifications when Non-Compliant DSC alerts are triggered.')
