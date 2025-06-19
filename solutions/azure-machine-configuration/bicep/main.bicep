@@ -76,6 +76,9 @@ resource la 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 resource la_nonCompliantDsc 'microsoft.insights/scheduledqueryrules@2024-01-01-preview' = {
   name: 'la-nonCompliantDsc'
   location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     severity: 3
     enabled: true
