@@ -219,12 +219,12 @@ To create remediation tasks for the two policy assignments, use the following co
 
 ```powershell
 # Get the policy assignments
-$nginxPolicyAssignment = Get-AzPolicyAssignment -Name 'nginx-install-assigment'
-$windowsPolicyAssignment = Get-AzPolicyAssignment -Name 'IIS-install-assigment'
+$nginxPolicyAssignment = Get-AzPolicyAssignment -Name 'nginx-install-assigment' -Scope $ResourceGroup.ResourceId
+$windowsPolicyAssignment = Get-AzPolicyAssignment -Name 'IIS-install-assigment' -Scope $ResourceGroup.ResourceId
 
 # Create remediation tasks for each policy assignment
-Start-AzPolicyRemediation -Name 'nginx-remediation' -PolicyAssignmentId $nginxPolicyAssignment.ResourceId -ResourceGroupName 'rg-machine-configuration-eastus'
-Start-AzPolicyRemediation -Name 'iis-remediation' -PolicyAssignmentId $windowsPolicyAssignment.ResourceId -ResourceGroupName 'rg-machine-configuration-eastus'
+Start-AzPolicyRemediation -Name 'nginx-remediation' -PolicyAssignmentId $nginxPolicyAssignment.Id -ResourceGroupName 'rg-machine-configuration-eastus'
+Start-AzPolicyRemediation -Name 'iis-remediation' -PolicyAssignmentId $windowsPolicyAssignment.Id -ResourceGroupName 'rg-machine-configuration-eastus'
 ```
 
 **Explanation:**  
