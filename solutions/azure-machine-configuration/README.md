@@ -202,6 +202,15 @@ To apply policies using Azure Machine Configuration, each virtual machine must m
 az deployment group create --resource-group rg-machine-configuration-eastus -f ./bicep/main.bicep -p policyUserAssignedIdentityId=$POLICY_DOWNLOAD_USER_ASSIGNED_IDENTITY
 ```
 
+To query policy compliance data using Azure Resource Graph, the identity executing the query must have the Reader role assigned at the subscription level. This is because Azure Resource Graph aggregates and exposes resource and compliance information across the entire subscription, and accessing this data requires read permissions. Assigning the Reader role ensures the identity can retrieve policy states, compliance results, and other metadata necessary for auditing and reporting, without granting permissions to modify resources.
+The Bicep template defines an alert based on an Azure Graph Resource query. In order to execute that query, it needs to have the Reader role at the subscription level.
+
+```bash
+ALERT_SYSTEM_ID=$(az deployment group show --resource-group rg-machine-configuration-eastus --name main --query "properties.outputs.alertSystemId.value" --output tsv)
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+az role assignment create --assignee $ALERT_SYSTEM_ID --role Reader --scope /subscriptions/$SUBSCRIPTION_ID
+```
+
 ## Check Policy downloaded
 
 To verify that the guest configuration policy has been successfully downloaded and applied, you can inspect the virtual machine using Azure Bastion, which is deployed as part of this solution. Use Azure Bastion to securely connect to the virtual machine without exposing public IPs.

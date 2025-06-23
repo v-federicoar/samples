@@ -303,3 +303,5 @@ resource vm_guestConfigExtensionLinux 'Microsoft.Compute/virtualMachines/extensi
     }
   }
 ]
+
+output alertSystemId string = la_nonCompliantDsc.id
