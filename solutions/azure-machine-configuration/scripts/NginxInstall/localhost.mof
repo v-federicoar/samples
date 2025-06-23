@@ -1,19 +1,19 @@
 /*
 @TargetNode='localhost'
 @GeneratedBy=v-federicoar
-@GenerationDate=06/23/2025 10:22:25
+@GenerationDate=06/23/2025 10:22:24
 @GenerationHost=DESKTOP-HG9KK6L
 */
 
-instance of MSFT_WindowsFeature as $MSFT_WindowsFeature1ref
+instance of nxPackage as $nxPackage1ref
 {
-SourceInfo = "C:\\repositories\\samples\\solutions\\azure-machine-configuration\\scripts\\windows-config.ps1::7::9::WindowsFeature";
- Name = "Web-Server";
- ModuleName = "PSDscResources";
- ResourceID = "[WindowsFeature]WebServer";
+SourceInfo = "C:\\repositories\\samples\\solutions\\azure-machine-configuration\\scripts\\linux-config.ps1::7::9::nxPackage";
+ Name = "nginx";
+ ModuleName = "nxtools";
+ ResourceID = "[nxPackage]nginx";
  Ensure = "Present";
- ModuleVersion = "2.12.0.0";
- ConfigurationName = "windowsfeatures";
+ ModuleVersion = "1.5.0";
+ ConfigurationName = "NginxInstall";
 };
 instance of OMI_ConfigurationDocument
 
@@ -26,10 +26,10 @@ instance of OMI_ConfigurationDocument
 
                         Author="v-federicoar";
 
-                        GenerationDate="06/23/2025 10:22:25";
+                        GenerationDate="06/23/2025 10:22:24";
 
                         GenerationHost="DESKTOP-HG9KK6L";
 
-                        Name="windowsfeatures";
+                        Name="NginxInstall";
 
                     };
