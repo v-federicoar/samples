@@ -1,0 +1,319 @@
+{
+    "properties": {
+        "displayName": "Enable Nginx on Linux VMs",
+        "policyType": "Custom",
+        "mode": "Indexed",
+        "description": "Enable Nginx on Linux VMs",
+        "metadata": {
+            "category": "Guest Configuration",
+            "version": "1.0.0",
+            "requiredProviders": [
+                "Microsoft.GuestConfiguration"
+            ],
+            "guestConfiguration": {
+                "name": "NginxInstall",
+                "version": "1.0.0",
+                "contentType": "Custom",
+                "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
+                "contentHash": "0A93E0AB40D52D4DC64F0E412A6C8CE92E3B2B79E74329BB61D086E93625C5E1",
+                "contentManagedIdentity": "/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+            }
+        },
+        "parameters": {},
+            "policyRule": {
+                "if": {
+                    "anyOf": [
+                        {
+                            "allOf": [
+                                {
+                                    "anyOf": [
+                                        {
+                                            "field": "type",
+                                            "equals": "Microsoft.Compute/virtualMachines"
+                                        },
+                                        {
+                                            "field": "type",
+                                            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "field": "tags['aks-managed-orchestrator']",
+                                    "exists": "false"
+                                },
+                                {
+                                    "field": "tags['aks-managed-poolName']",
+                                    "exists": "false"
+                                },
+                                {
+                                    "anyOf": [
+                                        {
+                                            "field": "Microsoft.Compute/imagePublisher",
+                                            "in": [
+                                                "microsoft-aks",
+                                                "qubole-inc",
+                                                "datastax",
+                                                "couchbase",
+                                                "scalegrid",
+                                                "checkpoint",
+                                                "paloaltonetworks",
+                                                "debian",
+                                                "credativ"
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "OpenLogic"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "notLike": "6*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "Oracle"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "notLike": "6*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "RedHat"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "notLike": "6*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "center-for-internet-security-inc"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageOffer",
+                                                    "notLike": "cis-windows*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "Suse"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "notLike": "11*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "Canonical"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "notLike": "12*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "microsoft-dsvm"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageOffer",
+                                                    "notLike": "dsvm-win*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "cloudera"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "notLike": "6*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "microsoft-ads"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageOffer",
+                                                    "like": "linux*"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "anyOf": [
+                                                        {
+                                                            "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
+                                                            "exists": true
+                                                        },
+                                                        {
+                                                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                                            "like": "Linux*"
+                                                        },
+                                                        {
+                                                            "field": "Microsoft.Compute/virtualMachineScaleSets/osProfile.linuxConfiguration",
+                                                            "exists": true
+                                                        },
+                                                        {
+                                                            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
+                                                            "like": "Linux*"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "anyOf": [
+                                                        {
+                                                            "field": "Microsoft.Compute/imagePublisher",
+                                                            "exists": false
+                                                        },
+                                                        {
+                                                            "field": "Microsoft.Compute/imagePublisher",
+                                                            "notIn": [
+                                                                "OpenLogic",
+                                                                "RedHat",
+                                                                "credativ",
+                                                                "Suse",
+                                                                "Canonical",
+                                                                "microsoft-dsvm",
+                                                                "cloudera",
+                                                                "microsoft-ads",
+                                                                "center-for-internet-security-inc",
+                                                                "Oracle",
+                                                                "AzureDatabricks",
+                                                                "azureopenshift"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "then": {
+                    "effect": "deployIfNotExists",
+                    "details": {
+                        "roleDefinitionIds": [
+                            "/providers/Microsoft.Authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31"
+                        ],
+                        "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+                        "name": "[concat('NginxInstall$pid', uniqueString(policy().assignmentId, policy().definitionReferenceId))]",
+                        "existenceCondition": {
+                            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                            "equals": "Compliant"
+                        },
+                        "deployment": {
+                            "properties": {
+                                "mode": "incremental",
+                                "parameters": {
+                                    "vmName": {
+                                        "value": "[field('name')]"
+                                    },
+                                    "location": {
+                                        "value": "[field('location')]"
+                                    },
+                                    "type": {
+                                        "value": "[field('type')]"
+                                    },
+                                    "assignmentName": {
+                                        "value": "[concat('NginxInstall$pid', uniqueString(policy().assignmentId, policy().definitionReferenceId))]"
+                                    }
+                                },
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "vmName": {
+                                            "type": "string"
+                                        },
+                                        "location": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string"
+                                        },
+                                        "assignmentName": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "resources": [
+                                        {
+                                            "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                                            "apiVersion": "2024-04-05",
+                                            "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                                            "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('assignmentName'))]",
+                                            "location": "[parameters('location')]",
+                                            "properties": {
+                                                "guestConfiguration": {
+                                                    "name": "NginxInstall",
+                                                    "version": "1.0.0",
+                                                    "contentType": "Custom",
+                                                    "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
+                                                    "contentHash": "0A93E0AB40D52D4DC64F0E412A6C8CE92E3B2B79E74329BB61D086E93625C5E1",
+                                                    "assignmentType": "ApplyAndAutoCorrect",
+                                                    "contentManagedIdentity": "/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachineScaleSets'))]",
+                                            "apiVersion": "2024-04-05",
+                                            "type": "Microsoft.Compute/virtualMachineScaleSets/providers/guestConfigurationAssignments",
+                                            "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('assignmentName'))]",
+                                            "location": "[parameters('location')]",
+                                            "properties": {
+                                                "guestConfiguration": {
+                                                    "name": "NginxInstall",
+                                                    "version": "1.0.0",
+                                                    "contentType": "Custom",
+                                                    "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
+                                                    "contentHash": "0A93E0AB40D52D4DC64F0E412A6C8CE92E3B2B79E74329BB61D086E93625C5E1",
+                                                    "assignmentType": "ApplyAndAutoCorrect",
+                                                    "contentManagedIdentity": "/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "name": "8dc0f895-1a0f-47d5-aca1-67554956cc27"
+    }
