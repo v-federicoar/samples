@@ -9,7 +9,7 @@ $PolicyConfig      = @{
   PolicyVersion = '1.0.0'
   Mode          = 'ApplyAndAutoCorrect'
   LocalContentPath = '.\NginxInstall.zip'
-  ManagedIdentityResourceId = '/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus'
+  ManagedIdentityResourceId = '/subscriptions/xx/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus'
 }
 
 New-GuestConfigurationPolicy @PolicyConfig -ExcludeArcMachines

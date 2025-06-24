@@ -227,7 +227,6 @@ Start-AzPolicyRemediation -Name 'nginx-remediation' -PolicyAssignmentId $nginxPo
 Start-AzPolicyRemediation -Name 'iis-remediation' -PolicyAssignmentId $windowsPolicyAssignment.Id -ResourceGroupName 'rg-machine-configuration-eastus'
 ```
 
-**Explanation:**  
 Remediation tasks instruct Azure Policy to immediately scan the targeted resources and, if necessary, deploy the Guest Configuration extension or apply the configuration package to bring resources into compliance. This accelerates the application of your policies, ensuring that configuration changes are enforced without delay.
 
 ## Check Policy downloaded
