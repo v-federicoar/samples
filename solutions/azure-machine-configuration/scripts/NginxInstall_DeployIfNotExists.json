@@ -16,7 +16,7 @@
                 "contentType": "Custom",
                 "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
                 "contentHash": "0A93E0AB40D52D4DC64F0E412A6C8CE92E3B2B79E74329BB61D086E93625C5E1",
-                "contentManagedIdentity": "/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
             }
         },
         "parameters": {},
@@ -285,7 +285,7 @@
                                                     "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
                                                     "contentHash": "0A93E0AB40D52D4DC64F0E412A6C8CE92E3B2B79E74329BB61D086E93625C5E1",
                                                     "assignmentType": "ApplyAndAutoCorrect",
-                                                    "contentManagedIdentity": "/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
                                                 }
                                             }
                                         },
@@ -303,7 +303,7 @@
                                                     "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
                                                     "contentHash": "0A93E0AB40D52D4DC64F0E412A6C8CE92E3B2B79E74329BB61D086E93625C5E1",
                                                     "assignmentType": "ApplyAndAutoCorrect",
-                                                    "contentManagedIdentity": "/subscriptions/xxx/resourceGroups/rg-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
                                                 }
                                             }
                                         }
@@ -315,5 +315,5 @@
                 }
             }
         },
-        "name": "8dc0f895-1a0f-47d5-aca1-67554956cc27"
+        "name": "e9e79480-af14-49b2-bc05-2150855cc90d"
     }

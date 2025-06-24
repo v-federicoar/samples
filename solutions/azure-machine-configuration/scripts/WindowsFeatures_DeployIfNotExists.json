@@ -16,7 +16,7 @@
                 "contentType": "Custom",
                 "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/WindowsFeatures.zip",
                 "contentHash": "0077FE4178401048D94D4019FFDB79BB1D5DCEEDC5EB8590ECBB058ADDB8BAA3",
-                "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
             }
         },
         "parameters": {},
@@ -269,7 +269,7 @@
                                                     "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/WindowsFeatures.zip",
                                                     "contentHash": "0077FE4178401048D94D4019FFDB79BB1D5DCEEDC5EB8590ECBB058ADDB8BAA3",
                                                     "assignmentType": "ApplyAndAutoCorrect",
-                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
                                                 }
                                             }
                                         },
@@ -287,7 +287,7 @@
                                                     "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/WindowsFeatures.zip",
                                                     "contentHash": "0077FE4178401048D94D4019FFDB79BB1D5DCEEDC5EB8590ECBB058ADDB8BAA3",
                                                     "assignmentType": "ApplyAndAutoCorrect",
-                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
+                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
                                                 }
                                             }
                                         }
@@ -299,5 +299,5 @@
                 }
             }
         },
-        "name": "c806181a-9db3-4476-93af-9a6182ab7601"
+        "name": "f284235e-88ae-4fb6-aaf4-5c9cc455a6ab"
     }
