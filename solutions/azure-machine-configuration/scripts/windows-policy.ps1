@@ -9,6 +9,6 @@ $PolicyConfig      = @{
   PolicyVersion = '1.0.0'
   Mode          = 'ApplyAndAutoCorrect'
   LocalContentPath = '.\WindowsFeatures.zip'
-  ManagedIdentityResourceId = '/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourcegroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus'
+  ManagedIdentityResourceId = '/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus'
 }
 New-GuestConfigurationPolicy @PolicyConfig -ExcludeArcMachines
