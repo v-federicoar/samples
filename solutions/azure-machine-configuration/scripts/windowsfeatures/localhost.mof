@@ -1,0 +1,35 @@
+/*
+@TargetNode='localhost'
+@GeneratedBy=v-federicoar
+@GenerationDate=06/25/2025 11:30:37
+@GenerationHost=DESKTOP-HG9KK6L
+*/
+
+instance of MSFT_WindowsFeature as $MSFT_WindowsFeature1ref
+{
+SourceInfo = "C:\\repositories\\samples\\solutions\\azure-machine-configuration\\scripts\\windows-config.ps1::7::9::WindowsFeature";
+ Name = "Web-Server";
+ ModuleName = "PSDscResources";
+ ResourceID = "[WindowsFeature]WebServer";
+ Ensure = "Present";
+ ModuleVersion = "2.12.0.0";
+ ConfigurationName = "windowsfeatures";
+};
+instance of OMI_ConfigurationDocument
+
+                    {
+ Version="2.0.0";
+
+                        MinimumCompatibleVersion = "1.0.0";
+
+                        CompatibleVersionAdditionalProperties= {"Omi_BaseResource:ConfigurationName"};
+
+                        Author="v-federicoar";
+
+                        GenerationDate="06/25/2025 11:30:37";
+
+                        GenerationHost="DESKTOP-HG9KK6L";
+
+                        Name="windowsfeatures";
+
+                    };
