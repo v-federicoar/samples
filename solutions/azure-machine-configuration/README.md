@@ -260,6 +260,10 @@ Once compliance is confirmed, you can test the result by accessing the virtual m
 ![Checking Windows Compliant situation](./images/Checking.png)  
 ![Checking Linux Compliant situation](./images/CheckingLinux.png)  
 
+If compliance is not detected, an alert will be raised and you will receive an email. 
+
+![Alert](./images/AlertEmail.png)  
+
 ### Querying Policy Compliance with Azure Resource Graph
 
 Azure Policy compliance data can be queried using [Azure Resource Graph](https://learn.microsoft.com/azure/governance/policy/samples/resource-graph-samples), which enables you to explore and analyze policy states at scale across your environment. The [Resource Graph Explorer](https://learn.microsoft.com/azure/governance/resource-graph/first-query-portal) in the Azure portal provides an interactive interface to run Kusto Query Language (KQL) queries against your Azure resources, including policy assignments, compliance results, and non-compliant resources. This allows you to quickly identify compliance issues, generate reports, and gain insights into your policy landscape.
