@@ -16,7 +16,7 @@
                 "contentType": "Custom",
                 "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
                 "contentHash": "AF5F2162C47E8AB976D351483585CA08A6BCB3FEAF47C896718A7FA599259F57",
-                "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastuss"
+                "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
             }
         },
         "parameters": {},
@@ -285,7 +285,7 @@
                                                     "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
                                                     "contentHash": "AF5F2162C47E8AB976D351483585CA08A6BCB3FEAF47C896718A7FA599259F57",
                                                     "assignmentType": "ApplyAndAutoCorrect",
-                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastuss"
+                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
                                                 }
                                             }
                                         },
@@ -303,7 +303,7 @@
                                                     "contentUri": "https://stpolices30vznnf.blob.core.windows.net/azuremachineconfiguration/NginxInstall.zip",
                                                     "contentHash": "AF5F2162C47E8AB976D351483585CA08A6BCB3FEAF47C896718A7FA599259F57",
                                                     "assignmentType": "ApplyAndAutoCorrect",
-                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastuss"
+                                                    "contentManagedIdentity": "/subscriptions/132f0217-59d1-4c16-8b39-c3d71b36e521/resourceGroups/rg-far1-machine-configuration-eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-policy-download-eastus"
                                                 }
                                             }
                                         }
@@ -315,5 +315,5 @@
                 }
             }
         },
-        "name": "4d9e0276-de76-40ed-b153-5f5c2c883864"
+        "name": "83b8446c-2d96-4d5e-9f3f-fdd4ca7fe3b5"
     }
