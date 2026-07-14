@@ -99,6 +99,9 @@ resource nic_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-0
 resource vm 'Microsoft.Compute/virtualMachines@2025-11-01' = {
   name: 'vm-learn-prod-${location}-${spokeName}'
   location: location
+  zones: [
+    '1'
+  ]
   identity: {
     // It is required by the Guest Configuration extension.
     type: 'SystemAssigned'
@@ -188,3 +191,93 @@ resource vmGuestConfigExtension 'Microsoft.Compute/virtualMachines/extensions@20
 }
 
 output vnetId string = vnet.id
+
+@description('Data Collection Rule that collects Linux performance counters and syslog from the spoke VM into the hub Log Analytics Workspace.')
+resource dcr 'Microsoft.Insights/dataCollectionRules@2024-03-11' = {
+  name: 'dcr-vm-learn-prod-${location}-${spokeName}'
+  location: location
+  properties: {
+    destinations: {
+      logAnalytics: [
+        {
+          workspaceResourceId: logAnalyticsWorkspaceId
+          name: 'hub-la'
+        }
+      ]
+    }
+    dataFlows: [
+      {
+        streams: [
+          'Microsoft-InsightsMetrics'
+          'Microsoft-Syslog'
+        ]
+        destinations: [
+          'hub-la'
+        ]
+      }
+    ]
+    dataSources: {
+      performanceCounters: [
+        {
+          streams: [
+            'Microsoft-InsightsMetrics'
+          ]
+          samplingFrequencyInSeconds: 60
+          counterSpecifiers: [
+            'Processor\\PercentProcessorTime'
+            'Memory\\AvailableMBytes'
+            'LogicalDisk\\PercentFreeSpace'
+            'Network\\BytesReceivedPerSecond'
+            'Network\\BytesSentPerSecond'
+          ]
+          name: 'basicPerformanceCounters'
+        }
+      ]
+      syslog: [
+        {
+          streams: [
+            'Microsoft-Syslog'
+          ]
+          facilityNames: [
+            'syslog'
+          ]
+          logLevels: [
+            'Warning'
+            'Error'
+            'Critical'
+            'Alert'
+            'Emergency'
+          ]
+          name: 'syslogBase'
+        }
+      ]
+    }
+  }
+}
+
+@description('Associates the Data Collection Rule with the spoke VM so the Azure Monitor Agent knows where to send data.')
+resource dcrAssociation 'Microsoft.Insights/dataCollectionRuleAssociations@2024-03-11' = {
+  name: 'dcra-vm-learn-prod-${location}-${spokeName}'
+  scope: vm
+  properties: {
+    dataCollectionRuleId: dcr.id
+    description: 'Association of data collection rule to the spoke VM.'
+  }
+}
+
+@description('Azure Monitor Agent collects guest OS metrics and syslog from the VM and forwards them to the hub Log Analytics Workspace via the associated Data Collection Rule.')
+resource amaExtension 'Microsoft.Compute/virtualMachines/extensions@2025-11-01' = {
+  parent: vm
+  name: 'AzureMonitorLinuxAgent'
+  location: location
+  dependsOn: [
+    dcrAssociation
+  ]
+  properties: {
+    publisher: 'Microsoft.Azure.Monitor'
+    type: 'AzureMonitorLinuxAgent'
+    typeHandlerVersion: '1.29'
+    autoUpgradeMinorVersion: true
+    enableAutomaticUpgrade: true
+  }
+}

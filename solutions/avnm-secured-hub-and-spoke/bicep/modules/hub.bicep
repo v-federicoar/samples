@@ -116,8 +116,6 @@ resource pipVpnGateway 'Microsoft.Network/publicIPAddresses@2025-07-01' = {
   }
   zones: [
     '1'
-    '2'
-    '3'
   ]
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -205,8 +203,6 @@ resource pipsAzureFirewall 'Microsoft.Network/publicIPAddresses@2025-07-01' = [f
   }
   zones: [
     '1'
-    '2'
-    '3'
   ]
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -326,8 +322,6 @@ resource fwHub 'Microsoft.Network/azureFirewalls@2025-07-01' = {
   location: location
   zones: [
     '1'
-    '2'
-    '3'
   ]
   dependsOn: [
     // This helps prevent multiple PUT updates happening to the firewall causing a CONFLICT race condition
