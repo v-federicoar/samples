@@ -23,7 +23,7 @@ param routeTableId string
 
 /*** RESOURCES ***/
 
-resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2025-07-01' = {
   name: 'vnet-learn-prod-${location}-${toLower(spokeName)}'
   location: location
   properties: {
@@ -62,8 +62,8 @@ resource vnet_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-
 }
 
 @description('The private Network Interface Card for the Windows VM in spoke.')
-resource nic 'Microsoft.Network/networkInterfaces@2024-05-01' = {
-  name: 'nic-learn-prod-${location}-${spokeName}-ubuntu'
+resource nic 'Microsoft.Network/networkInterfaces@2025-07-01' = {
+  name: 'nic-learn-prod-${location}-${spokeName}'
   location: location
   properties: {
     ipConfigurations: [
@@ -96,8 +96,8 @@ resource nic_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-0
 }
 
 @description('A basic Ubuntu Linux virtual machine that will be attached to spoke.')
-resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
-  name: 'vm-learn-prod-${location}-${spokeName}-ubuntu'
+resource vm 'Microsoft.Compute/virtualMachines@2025-11-01' = {
+  name: 'vm-learn-prod-${location}-${spokeName}'
   location: location
   identity: {
     // It is required by the Guest Configuration extension.
@@ -172,7 +172,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
 
 // The Guest Configuration extension supports Azure governance at cloud scale, and can be installed after ensuring that a system-assigned identity is added at the VM level. This enable Azure policies to audit and report on configuration settings inside machines.
 @description('Install the Guest Configuration extension for Azure auto-manage machine configuration on top regulatory, security, and operational compliance.')
-resource vmGuestConfigExtension 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
+resource vmGuestConfigExtension 'Microsoft.Compute/virtualMachines/extensions@2025-11-01' = {
   parent: vm
   name: 'Microsoft.GuestConfiguration'
   location: location

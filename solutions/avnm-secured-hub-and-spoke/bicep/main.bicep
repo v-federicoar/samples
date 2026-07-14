@@ -83,7 +83,7 @@ module avnm 'modules/avnm.bicep' = {
 // This DeploymentScript resource executes a PowerShell script which calls the /commit endpoint and monitors the status of the deployment.
 //
 module deploymentScriptConnectivityConfigs 'modules/avnmDeploymentScript.bicep' = {
-  name: 'ds-connectivityconfigs-${location}'
+  name: 'script-connectivityconfigs-${location}'
   scope: resourceGroup
   dependsOn: [
     policy
@@ -93,12 +93,12 @@ module deploymentScriptConnectivityConfigs 'modules/avnmDeploymentScript.bicep' 
     configurationId: avnm.outputs.connectivityConfigurationId
     configType: 'Connectivity'
     networkManagerName: avnm.outputs.networkManagerName
-    deploymentScriptName: 'ds-${location}-connectivityconfigs'
+    deploymentScriptName: 'script-${location}-connectivityconfigs'
   }
 }
 
 module deploymentScriptSecurityConfigs 'modules/avnmDeploymentScript.bicep' = {
-  name: 'ds-securityadminconfigs-${location}'
+  name: 'script-securityadminconfigs-${location}'
   scope: resourceGroup
   dependsOn: [
     policy
@@ -108,7 +108,7 @@ module deploymentScriptSecurityConfigs 'modules/avnmDeploymentScript.bicep' = {
     configurationId: avnm.outputs.securtyAdminConfigurationId
     configType: 'SecurityAdmin'
     networkManagerName: avnm.outputs.networkManagerName
-    deploymentScriptName: 'ds-${location}-securityadminconfigs'
+    deploymentScriptName: 'script-${location}-securityadminconfigs'
   }
 }
 

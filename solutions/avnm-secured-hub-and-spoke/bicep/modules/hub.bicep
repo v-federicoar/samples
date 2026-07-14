@@ -5,8 +5,8 @@ param location string = resourceGroup().location
 /*** RESOURCES ***/
 
 @description('This Log Analyics Workspace stores logs from the regional hub network, its spokes, and other related resources. Workspaces are regional resource, as such there would be one workspace per hub (region)')
-resource laHub 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: 'la-hub-${location}'
+resource laHub 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
+  name: 'log-hub-${location}'
   location: location
   properties: {
     sku: {
@@ -47,7 +47,7 @@ resource laHub_diagnosticsSettings 'Microsoft.Insights/diagnosticSettings@2021-0
 }
 
 @description('The regional hub network.')
-resource vnetHub 'Microsoft.Network/virtualNetworks@2024-05-01' = {
+resource vnetHub 'Microsoft.Network/virtualNetworks@2025-07-01' = {
   name: 'vnet-learn-hub-${location}-001'
   location: location
   properties: {
@@ -99,7 +99,7 @@ resource vnetHub_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-
   }
 }
 
-resource snetGateway 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = {
+resource snetGateway 'Microsoft.Network/virtualNetworks/subnets@2025-07-01' = {
   name: 'GatewaySubnet'
   parent: vnetHub
   properties: {
@@ -108,8 +108,8 @@ resource snetGateway 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = {
 }
 
 @description('The public IPs for the regional VPN gateway.')
-resource pipVpnGateway 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
-  name: 'pip-learn-hub-${location}-vngw001'
+resource pipVpnGateway 'Microsoft.Network/publicIPAddresses@2025-07-01' = {
+  name: 'pip-learn-hub-${location}-001'
   location: location
   sku: {
     name: 'Standard'
@@ -147,7 +147,7 @@ resource pipVpnGateway_diagnosticSetting 'Microsoft.Insights/diagnosticSettings@
 }
 
 @description('The is the regional VPN gateway, configured with basic settings.')
-resource vgwHub 'Microsoft.Network/virtualNetworkGateways@2024-05-01' =  {
+resource vgwHub 'Microsoft.Network/virtualNetworkGateways@2025-07-01' =  {
   name: 'vgw-learn-hub-${location}-001'
   location: location
   properties: {
@@ -197,8 +197,8 @@ resource vgwHub_diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05
 
 // Allocate three IP addresses to the firewall
 var numFirewallIpAddressesToAssign = 1
-resource pipsAzureFirewall 'Microsoft.Network/publicIPAddresses@2024-05-01' = [for i in range(0, numFirewallIpAddressesToAssign): {
-  name: 'pip-fw-${location}-${padLeft(i, 2, '0')}'
+resource pipsAzureFirewall 'Microsoft.Network/publicIPAddresses@2025-07-01' = [for i in range(0, numFirewallIpAddressesToAssign): {
+  name: 'pip-afw-hub-${location}-${padLeft(i + 1, 3, '0')}'
   location: location
   sku: {
     name: 'Standard'
@@ -236,8 +236,8 @@ resource pipsAzureFirewall_diagnosticSetting 'Microsoft.Insights/diagnosticSetti
 }]
 
 @description('Azure Firewall Policy')
-resource fwPolicy 'Microsoft.Network/firewallPolicies@2024-05-01' = {
-  name: 'fw-policies-${location}'
+resource fwPolicy 'Microsoft.Network/firewallPolicies@2025-07-01' = {
+  name: 'afwp-hub-${location}'
   location: location
   properties: {
     sku: {
@@ -258,7 +258,7 @@ resource fwPolicy 'Microsoft.Network/firewallPolicies@2024-05-01' = {
   // This network hub starts out with only supporting external DNS queries. This is only being done for
   // simplicity in this deployment and is not guidance, please ensure all firewall rules are aligned with
   // your security standards.
-  resource defaultNetworkRuleCollectionGroup 'ruleCollectionGroups@2024-05-01' = {
+  resource defaultNetworkRuleCollectionGroup 'ruleCollectionGroups@2025-07-01' = {
     name: 'DefaultNetworkRuleCollectionGroup'
     properties: {
       priority: 200
@@ -298,7 +298,7 @@ resource fwPolicy 'Microsoft.Network/firewallPolicies@2024-05-01' = {
   }
 
   // Network hub starts out with no allowances for appliction rules
-  resource defaultApplicationRuleCollectionGroup 'ruleCollectionGroups@2024-05-01' = {
+  resource defaultApplicationRuleCollectionGroup 'ruleCollectionGroups@2025-07-01' = {
     name: 'DefaultApplicationRuleCollectionGroup'
     dependsOn: [
       defaultNetworkRuleCollectionGroup
@@ -321,8 +321,8 @@ resource fwPolicy 'Microsoft.Network/firewallPolicies@2024-05-01' = {
 }
 
 @description('This is the regional Azure Firewall that all regional spoke networks can egress through.')
-resource fwHub 'Microsoft.Network/azureFirewalls@2024-05-01' = {
-  name: 'fw-${location}'
+resource fwHub 'Microsoft.Network/azureFirewalls@2025-07-01' = {
+  name: 'afw-hub-${location}'
   location: location
   zones: [
     '1'
@@ -378,8 +378,8 @@ resource fwHub_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05
 }
 
 @description('Next hop to the regional hub\'s Azure Firewall')
-resource rt_nextHopToFirewall 'Microsoft.Network/routeTables@2024-05-01' = {
-  name: 'rt-to-hub-fw-${location}'
+resource rt_nextHopToFirewall 'Microsoft.Network/routeTables@2025-07-01' = {
+  name: 'rt-hub-fw-${location}'
   location: location
   properties: {
     routes: [
